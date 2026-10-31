@@ -1,103 +1,76 @@
-# LSM Mapper 🗺️
+# LSM Mapper
 
-**A free, standalone desktop application for automated 
-Landslide Susceptibility Mapping (LSM)**
+Free, open-source desktop software for **landslide susceptibility mapping (LSM)**.
+It takes a DEM, a landslide inventory and any number of additional conditioning
+factors, and produces validated susceptibility maps. You don't need a GIS or any
+programming to use it.
 
-No GIS software required. No coding knowledge needed.
-Upload a DEM + landslide inventory → get a full 
-susceptibility map in minutes.
+* **Terrain factors from the DEM:** elevation, slope and aspect (Horn), curvature, plan
+  and profile curvature (Zevenbergen & Thorne), TWI and SPI from depression-filled D8
+  flow accumulation, and distance to DEM-derived drainage.
+* **Any other factors**, as many as you need: continuous or categorical rasters,
+  multi-tile exports (e.g. Google Earth Engine), and vector layers turned into
+  distance surfaces.
+* **Automatic alignment checks** for coordinate system, pixel size, extent and NoData
+  (including float32 fill values). The resampling method follows the data type.
+  Layers that are coarser than they look (up-sampled) are flagged, and can optionally
+  be de-blocked.
+* **Six methods:** Random Forest, XGBoost, Logistic Regression, Frequency Ratio,
+  Weights of Evidence and Information Value.
+* **Editable hyper-parameters**, plus random or grid **tuning** with inner
+  cross-validation.
+* **Validation** by hold-out, repeated stratified *k*-fold CV and **spatial block CV**.
+  Nested tuning is available, so CV scores never see the tuning data.
+* **Importance:** impurity (RF), gain (XGBoost) and permutation importance on the test set.
+* **Multicollinearity:** VIF and Pearson correlation, with optional VIF-based factor screening.
+* **Map classes** by Jenks natural breaks (default), equal interval or quantile, with
+  class areas and the share of landslides in each class.
+* **A run report** (`run_report.json`) records every input, check, parameter, score and
+  package version, so any run can be repeated from its saved settings.
 
----
+## Download (Windows)
 
-## Features
+Download `LSM_Mapper_v2.x_Windows_x64.zip` from the
+[Releases](https://github.com/soumitray45-cehstu/lsm_mapper/releases) page, unzip it
+and run `LSM_Mapper.exe`. There is nothing to install.
+`LSM_Mapper_cli.exe --selftest` runs a short synthetic case to check the installation.
 
-- ✅ **6 Methods**: Random Forest, XGBoost, 
-  Logistic Regression, Frequency Ratio, 
-  Weights of Evidence, Information Value
-- ✅ **Auto-derives 8 terrain factors** from DEM
-- ✅ **AUC-ROC validation** with ROC curve chart
-- ✅ **Feature importance** analysis
-- ✅ **Interactive HTML map** output
-- ✅ **5-class susceptibility map** (Very Low → Very High)
-- ✅ **Completely free** — no license required
-- ✅ **Standalone .exe** — no installation needed
+## Run from source
 
----
+```bash
+pip install -r requirements.txt
+python main.py                      # desktop interface
+python main.py --run settings.json  # batch run with saved settings
+python -m pytest tests              # tests
+```
 
-## Download
+## Workflow
 
-👉 [Download LSM Mapper v1.0 (.exe)](releases)
+1. **Data**: choose the DEM and the landslide inventory (points or polygons), and
+   optionally a study-area boundary. Add further factors with *Add factor*.
+2. **Settings**: choose the methods, then edit hyper-parameters and search spaces.
+   Set the tuning, validation, non-landslide sampling and map classification options.
+3. **Run**: the log shows every check and step.
+4. **Results**: metrics table, maps, ROC curves, CV distributions, importance and
+   correlation figures, plus an interactive web map.
 
----
+Outputs (in the chosen folder):
+`factors/` aligned factor rasters · `maps/` probability and class GeoTIFFs, plus
+`interactive_map.html` · `tables/` samples, CV folds, importance, VIF and class weights ·
+`figures/` 300 dpi PNG · `models/` fitted models · `run_report.json` · `run_config.json`.
 
-## How to Use
+## Case study
 
-1. Download and run `LSM_Mapper.exe`
-2. Upload your **DEM** (GeoTIFF)
-3. Upload your **Landslide Inventory** (Shapefile)
-4. Select a method (e.g. XGBoost)
-5. Click **Train Model**
-6. View your susceptibility map
-
----
-
-## Supported Input Formats
-
-| Data | Format |
-|---|---|
-| DEM | GeoTIFF (.tif) |
-| Landslide Inventory | Shapefile (.shp) |
-| Optional factors | GeoTIFF (.tif) |
-
----
-
-## Optional Conditioning Factors
-
-Upload any of these to improve accuracy:
-- Soil type, Geology, LULC, Rainfall, NDVI
-- Distance to Roads, Drainage, Faults
-
----
-
-## Validation — Chattogram Division, Bangladesh
-
-| Method | AUC-ROC |
-|---|---|
-| XGBoost | **0.9251** ⭐ |
-| Random Forest | 0.8501 |
-| Weights of Evidence | 0.8322 |
-| Frequency Ratio | 0.8240 |
-| Information Value | 0.8164 |
-| Logistic Regression | 0.7580 |
-
----
-
-## System Requirements
-
-- Windows 10/11 (64-bit)
-- 8 GB RAM minimum
-- 2 GB free disk space
-
----
+The settings and results for the Chattogram Division (Bangladesh) case study in the
+accompanying paper are in [`case_study/`](case_study).
 
 ## Citation
 
-If you use LSM Mapper in your research, please cite:
-
-> [Your Name] et al. (2025). LSM Mapper: A GIS-Independent 
-> Desktop Application for Automated Landslide Susceptibility 
-> Mapping. *Natural Hazards and Earth System Sciences*.
-> DOI: [to be added]
-
----
-
-## Built With
-
-Python 3.11 · PyQt5 · scikit-learn · XGBoost · 
-rasterio · geopandas · folium · matplotlib
-
----
+Ray, S., Rahman, M. M., & Nuhash, M. M. R. LSM Mapper: an open-source desktop
+application for landslide susceptibility mapping with machine learning and bivariate
+statistical methods. *Mersin Photogrammetry Journal* (under review).
+Software archive: https://doi.org/10.5281/zenodo.21427097
 
 ## License
 
-MIT License — free for academic and commercial use.
+MIT
