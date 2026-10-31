@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import platform
@@ -19,7 +20,7 @@ import pandas as pd
 import rasterio
 from rasterio.windows import Window
 
-from . import classify, raster, sampling, terrain, validation
+from . import classify, raster, reliability, sampling, terrain, validation
 from .models import ALL_METHODS, STAT_METHODS, make_model, params_of
 
 DEM_FACTORS = ["Elevation", "Slope", "Aspect", "Curvature", "Plan_Curvature",
@@ -69,6 +70,11 @@ class RunConfig:
     spatial_block_km: float | None = 10.0
     spatial_repeats: int = 5
     nested_cv: bool = True
+    tune_cv: str = "random"             # inner CV of the tuner: random | spatial
+    # reliability diagnostics (area of applicability, uncertainty, artefacts)
+    reliability: bool = True
+    reliability_methods: list | None = None   # None = every method
+    reliability_folds: int = 5
     # outputs
     make_maps: bool = True
     classification: str = "jenks"
@@ -106,7 +112,7 @@ class Run:
         if cfg.resume and os.path.exists(rp):
             with open(rp) as f:
                 self.prev = json.load(f)
-            if self.prev.get("config", {}) != asdict(cfg):
+            if not _same_settings(self.prev.get("config", {}), asdict(cfg)):
                 self.prev = {}          # settings changed: start again
 
     # ------------------------------------------------------------------ factors
@@ -264,6 +270,8 @@ class Run:
         xy = self.df[["x", "y"]].to_numpy(float)
         tr, te = validation.holdout(X, y, cfg.test_size, cfg.seed)
         self.split = (tr, te)
+        groups = (validation.spatial_blocks(xy, (cfg.spatial_block_km or 10.0) * 1000)
+                  if cfg.tune_cv == "spatial" else None)
         self.report["split"] = {"train": int(len(tr)), "test": int(len(te))}
         self.report["methods"] = {}
         self.fitted = {}
@@ -289,12 +297,13 @@ class Run:
             pipe = mk()
             tune_kw = dict(search=cfg.tune_search, n_iter=cfg.tune_iter,
                            inner_folds=cfg.tune_inner_folds, n_jobs=cfg.n_jobs,
-                           space=(cfg.search_spaces or {}).get(m) or None)
+                           space=(cfg.search_spaces or {}).get(m) or None,
+                           spatial=cfg.tune_cv == "spatial")
             if cfg.tune:
                 self.log(f"Tuning on the training set ({cfg.tune_search} search, "
-                         f"{cfg.tune_inner_folds}-fold inner CV)...")
+                         f"{cfg.tune_inner_folds}-fold {cfg.tune_cv} inner CV)...")
                 search = validation.tuner(pipe, m, seed=cfg.seed, **tune_kw)
-                search.fit(X[tr], y[tr])
+                search.fit(X[tr], y[tr], **({"groups": groups[tr]} if groups is not None else {}))
                 pipe = search.best_estimator_
                 entry["tuning"] = {"best_inner_auc": float(search.best_score_),
                                    "best_params": {k.replace("clf__", ""): _py(v)
@@ -396,6 +405,132 @@ class Run:
             for s in srcs.values():
                 s.close()
 
+    # ------------------------------------------------------------------ reliability
+    def _block_iter(self, block_rows=256):
+        g = self.grid
+        srcs = {k: rasterio.open(self.factors[k]) for k in self.names}
+        try:
+            for r0 in range(0, g.height, block_rows):
+                h = min(block_rows, g.height - r0)
+                vm = self.valid[r0:r0 + h]
+                if not vm.any():
+                    continue
+                w = Window(0, r0, g.width, h)
+                cols = [raster.clean_nodata(srcs[k].read(1, window=w).astype(np.float32),
+                                            srcs[k].nodata)[vm] for k in self.names]
+                yield r0, h, vm, np.stack(cols, 1)
+        finally:
+            for s in srcs.values():
+                s.close()
+
+    def _edge_layers(self):
+        """Raw (not de-blocked) versions of coarse input layers, aligned with
+        nearest-neighbour resampling, used to locate their block edges."""
+        cfg, g = self.cfg, self.grid
+        names = reliability.coarse_layers(self.report.get("layer_checks"), g.res)
+        out = {}
+        for spec in cfg.factors:
+            spec = FactorSpec(**spec) if isinstance(spec, dict) else spec
+            if spec.name not in names or spec.name not in self.names:
+                continue
+            p = os.path.join(self.out, "_work", f"edges_{spec.name}.tif")
+            if not os.path.exists(p):
+                raster.align_tiles(spec.paths, g, p, categorical=True,
+                                   resampling=raster.Resampling.nearest, smooth_to_m=None,
+                                   work=os.path.join(self.out, "_work"))
+            out[spec.name] = p
+        return out
+
+    def reliability(self):
+        """Area of applicability, accuracy against dissimilarity, CV-ensemble
+        uncertainty and block-edge artefact index for each method's map."""
+        cfg, g = self.cfg, self.grid
+        methods = [m for m in (cfg.reliability_methods or list(self.fitted)) if m in self.fitted]
+        X = self.df[self.names].to_numpy(float)
+        y = self.df.label.to_numpy(int)
+        xy = self.df[["x", "y"]].to_numpy(float)
+        tr, _ = self.split
+        block = (cfg.spatial_block_km or 10.0) * 1000
+        k = cfg.reliability_folds
+        cats = [c for c in self.categorical if c in self.names]
+        fold_all = reliability.spatial_folds(xy, y, block, k, cfg.seed)
+        fold_tr = reliability.spatial_folds(xy[tr], y[tr], block, k, cfg.seed)
+        area_X = self.area[self.names].to_numpy(float)
+        prev = self.prev.get("reliability", {}) if self.prev.get("split") == self.report.get("split") else {}
+        rep = self.report.setdefault("reliability", {})
+        rep["settings"] = {"folds": k, "block_km": block / 1000,
+                           "weights": "permutation importance (equal weights if unavailable)",
+                           "threshold": "upper whisker of cross-validated training DI"}
+        # weights for methods without an importance table: best ML method
+        ml = {m: e for m, e in self.report["methods"].items() if e.get("importance")}
+        best_ml = max(ml, key=lambda m: ml[m].get("cv_spatial", ml[m]["cv_kfold"])["AUC"]["mean"]) if ml else None
+        edges = self._edge_layers()
+        edge_arr = {n: raster.read_band(p) for n, p in edges.items()}
+        for m in methods:
+            files = {kk: os.path.join(self.out, "maps", f"{kk}_{_slug(m)}.tif")
+                     for kk in ("AOA_DI", "AOA_mask", "Uncertainty_SD")}
+            if m in prev and all(os.path.exists(f) for f in files.values()):
+                rep[m] = prev[m]
+                self.log(f"Resumed: {m} reliability exists.")
+                continue
+            self.log(f"Reliability: {m}...")
+            w_src = m
+            w = reliability.importance_weights(self.report["methods"][m], self.names)
+            if w is None and best_ml:
+                w_src, w = best_ml, reliability.importance_weights(self.report["methods"][best_ml], self.names)
+            space = reliability.FeatureSpace(self.names, cats, w)
+            aoa = reliability.AOA(space).fit(X[tr], fold_tr)
+            pipe = self.fitted[m]
+            models, oof = reliability.fold_models(pipe, m, X, y, fold_all, area_X)
+            di_oof = reliability.fold_di(self.names, cats, w, X, fold_all)
+            by_di = reliability.auc_by_di(y, oof, di_oof, aoa.threshold_)
+            pd.DataFrame({"x": xy[:, 0], "y": xy[:, 1], "label": y, "fold": fold_all,
+                          "oof_probability": oof, "DI": di_oof}).to_csv(
+                os.path.join(self.out, "tables", f"oof_spatial_{_slug(m)}.csv"), index=False)
+            pd.DataFrame(by_di).to_csv(os.path.join(self.out, "tables", f"auc_by_di_{_slug(m)}.csv"),
+                                       index=False)
+            DI = np.full(g.shape, np.nan, np.float32)
+            SD = np.full(g.shape, np.nan, np.float32)
+            for r0, h, vm, Xb in self._block_iter():
+                DI[r0:r0 + h][vm] = aoa.di(Xb)
+                P = np.stack([mm.predict_proba(Xb)[:, 1] for mm in models], 0)
+                SD[r0:r0 + h][vm] = P.std(0)
+            mask = np.where(np.isfinite(DI), np.where(DI <= aoa.threshold_, 1, 2), 0).astype("uint8")
+            raster.write_array(DI, g, files["AOA_DI"])
+            raster.write_array(mask, g, files["AOA_mask"], dtype="uint8", nodata=0)
+            raster.write_array(SD, g, files["Uncertainty_SD"])
+            cls = raster.read_band(os.path.join(self.out, "maps", f"LSM_{_slug(m)}_classes.tif"))
+            cls[cls == 0] = np.nan
+            prob = raster.read_band(os.path.join(self.out, "maps", f"LSM_{_slug(m)}_probability.tif"))
+            ls_out = mask[self.ls_rc[:, 0], self.ls_rc[:, 1]]
+            hv = np.isin(cls, (4, 5))
+            entry = {"weights_from": w_src,
+                     "weights": dict(zip(self.names, np.round(space.weights, 4).tolist())),
+                     "threshold": aoa.threshold_, "dbar": aoa.dbar_,
+                     "outside_aoa_pct": float(100 * (mask == 2).sum() / max((mask > 0).sum(), 1)),
+                     "landslides_outside_pct": float(100 * (ls_out == 2).mean()),
+                     "high_vhigh_outside_pct": float(100 * (hv & (mask == 2)).sum() / max(hv.sum(), 1)),
+                     "outside_by_class_pct": [float(100 * ((cls == c) & (mask == 2)).sum() /
+                                                    max((cls == c).sum(), 1)) for c in range(1, cfg.n_classes + 1)],
+                     "oof_spatial_auc": float(validation.roc_auc_score(y, oof)),
+                     "auc_by_di": by_di,
+                     "uncertainty_sd_mean": float(np.nanmean(SD)),
+                     "uncertainty_sd_p90": float(np.nanquantile(SD, 0.9)),
+                     "uncertainty_by_class": reliability.class_summary(cls, SD, cfg.n_classes),
+                     "di_by_class": reliability.class_summary(cls, DI, cfg.n_classes),
+                     "artefact_index": {}}
+            for n, la in edge_arr.items():
+                idx, npairs = reliability.artefact_index(prob, la)
+                entry["artefact_index"][n] = {"index": idx, "edge_pairs": npairs}
+            if "Slope" in self.factors:
+                entry["flat_terrain_check"] = self.report["methods"][m].get("flat_terrain_check")
+            rep[m] = entry
+            del DI, SD, mask, cls, prob
+            self.log(f"  outside AOA {entry['outside_aoa_pct']:.1f}% of area; "
+                     f"mean SD {entry['uncertainty_sd_mean']:.3f}; "
+                     f"artefact {({n: round(v['index'], 3) for n, v in entry['artefact_index'].items() if v['index']})}")
+            self._save_report()
+
     # ------------------------------------------------------------------ run
     def run(self):
         t0 = time.time()
@@ -403,6 +538,8 @@ class Run:
                  ("Multicollinearity", self.multicollinearity), ("Modelling", self.model_all)]
         if self.cfg.make_maps:
             steps.append(("Mapping", self.predict_maps))
+            if self.cfg.reliability:
+                steps.append(("Reliability", self.reliability))
         for label, fn in steps:
             self.log(f"== {label} ==")
             fn()
@@ -419,6 +556,30 @@ class Run:
     def _save_report(self):
         with open(os.path.join(self.out, "run_report.json"), "w") as f:
             json.dump(self.report, f, indent=2, default=_py)
+
+
+# settings that only affect the reliability step, which re-runs on its own
+_LATE_KEYS = {"reliability", "reliability_methods", "reliability_folds", "resume", "n_jobs"}
+
+
+def _same_settings(old: dict, new: dict) -> bool:
+    """True if a previous run used the same settings. Keys added in later
+    versions count as unchanged when the new value is their default."""
+    defaults = {}
+    for k, f in RunConfig.__dataclass_fields__.items():
+        if f.default is not dataclasses.MISSING:
+            defaults[k] = f.default
+        elif f.default_factory is not dataclasses.MISSING:
+            defaults[k] = f.default_factory()
+    for k, v in new.items():
+        if k in _LATE_KEYS:
+            continue
+        if k not in old:
+            if v != defaults.get(k):
+                return False
+        elif old[k] != v:
+            return False
+    return True
 
 
 def _slug(m):

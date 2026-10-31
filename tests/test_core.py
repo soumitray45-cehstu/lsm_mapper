@@ -205,3 +205,44 @@ def test_every_method_fits_and_ranks(method):
     p = m.predict_proba(X[300:])[:, 1]
     assert 0 <= p.min() and p.max() <= 1
     assert roc_auc_score(y[300:], p) > 0.7
+
+
+# ------------------------------------------------------------------ reliability
+def test_aoa_flags_novel_predictor_space():
+    from lsm_mapper.core import reliability as R
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(300, 3))
+    fold = np.arange(300) % 5
+    aoa = R.AOA(R.FeatureSpace(["a", "b", "c"])).fit(X, fold)
+    inside = aoa.di(rng.normal(size=(200, 3)))
+    outside = aoa.di(rng.normal(size=(200, 3)) + 8)
+    assert (inside <= aoa.threshold_).mean() > 0.9
+    assert (outside > aoa.threshold_).all()
+
+
+def test_feature_space_categorical_unseen_class():
+    from lsm_mapper.core import reliability as R
+    X = np.array([[0.0, 1], [1.0, 2], [2.0, 1]])
+    sp = R.FeatureSpace(["x", "lc"], ["lc"]).fit(X)
+    T = sp.transform(np.array([[1.0, 3]]))          # class 3 never seen
+    assert T.shape[1] == 1 + 2 + 1 and T[0, -1] == 1
+
+
+def test_artefact_index_detects_blocks():
+    from lsm_mapper.core import reliability as R
+    yy, xx = np.mgrid[0:120, 0:120]
+    layer = (xx // 20) + 10 * (yy // 20)             # 20-cell blocks
+    smooth = np.sin(xx / 15.0) + np.cos(yy / 17.0)
+    blocky = smooth + 0.5 * (layer % 3)
+    assert abs(R.artefact_index(smooth, layer)[0] - 1) < 0.15
+    assert R.artefact_index(blocky, layer)[0] > 3
+
+
+def test_auc_by_di_groups():
+    from lsm_mapper.core import reliability as R
+    rng = np.random.default_rng(1)
+    y = rng.integers(0, 2, 600)
+    di = rng.uniform(0, 1, 600)
+    p = np.where(di < 0.5, y * 0.8 + rng.uniform(0, 0.2, 600), rng.uniform(0, 1, 600))
+    rows = {r["group"]: r for r in R.auc_by_di(y, p, di, 0.5)}
+    assert rows["inside AOA"]["AUC"] > 0.95 and rows["outside AOA"]["AUC"] < 0.7

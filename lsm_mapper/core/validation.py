@@ -41,9 +41,13 @@ def holdout(X, y, test_size=0.3, seed=42):
 
 
 def tuner(pipe, method, search="random", n_iter=40, inner_folds=5, seed=42,
-          space=None, n_jobs=-1, groups=None):
+          space=None, n_jobs=-1, spatial=False):
+    """Hyper-parameter search scored by inner-CV AUC. With spatial=True the
+    inner folds are spatial blocks (pass groups= to .fit), so the parameters
+    are chosen for transfer to unseen areas rather than to nearby cells."""
     space = space or SEARCH_SPACES[method]
-    cv = StratifiedKFold(inner_folds, shuffle=True, random_state=seed)
+    cv = (StratifiedGroupKFold(inner_folds, shuffle=True, random_state=seed) if spatial
+          else StratifiedKFold(inner_folds, shuffle=True, random_state=seed))
     if search == "grid":
         return GridSearchCV(pipe, space, scoring="roc_auc", cv=cv, n_jobs=n_jobs, refit=True)
     n_comb = int(np.prod([len(v) for v in space.values()]))
@@ -71,11 +75,15 @@ def cross_validate(make, method, X, y, scheme="kfold", k=5, repeats=10, block_m=
             splits += list(sg.split(X, y, groups))
     else:
         raise ValueError(scheme)
+    inner_groups = spatial_blocks(xy, block_m or 10_000) if (tune and (tune_kw or {}).get("spatial")) else None
     for i, (tr, te) in enumerate(splits):
         pipe = make()
+        fit_kw = {}
         if tune:
             pipe = tuner(pipe, method, seed=seed + i, **(tune_kw or {}))
-        pipe.fit(X[tr], y[tr])
+            if inner_groups is not None:
+                fit_kw["groups"] = inner_groups[tr]
+        pipe.fit(X[tr], y[tr], **fit_kw)
         p = pipe.predict_proba(X[te])[:, 1]
         m = metrics(y[te], p, thresholded=thresholded)
         m.update(fold=i, repeat=i // k, n_test=int(len(te)))

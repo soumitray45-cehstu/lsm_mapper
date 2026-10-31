@@ -309,6 +309,10 @@ class SettingsTab(QWidget):
         self.tune.setChecked(True)
         self.search = QComboBox()
         self.search.addItems(["random", "grid"])
+        self.tunecv = QComboBox()
+        self.tunecv.addItems(["random", "spatial"])
+        self.tunecv.setToolTip("spatial: inner folds are spatial blocks, so parameters are chosen "
+                               "for prediction into unseen areas")
         self.n_iter = QSpinBox(); self.n_iter.setRange(5, 500); self.n_iter.setValue(30)
         self.inner = QSpinBox(); self.inner.setRange(2, 10); self.inner.setValue(3)
         self.folds = QSpinBox(); self.folds.setRange(2, 20); self.folds.setValue(5)
@@ -324,6 +328,7 @@ class SettingsTab(QWidget):
         f.addRow("Search", self.search)
         f.addRow("Random-search iterations", self.n_iter)
         f.addRow("Inner CV folds", self.inner)
+        f.addRow("Inner CV type", self.tunecv)
         f.addRow("Hold-out split", self.test)
         f.addRow("k-fold CV: folds", self.folds)
         f.addRow("k-fold CV: repeats", self.repeats)
@@ -351,6 +356,20 @@ class SettingsTab(QWidget):
         f.addRow("Distance from any landslide", self.buffer)
         v.addWidget(g)
 
+        g = QGroupBox("Reliability of the maps")
+        f = QFormLayout(g)
+        self.rel = QCheckBox("Area of applicability, uncertainty and artefact checks for every map")
+        self.rel.setChecked(True)
+        self.relk = QSpinBox(); self.relk.setRange(3, 10); self.relk.setValue(5)
+        f.addRow(self.rel)
+        f.addRow("Spatial folds (ensemble size)", self.relk)
+        note = QLabel("Writes a dissimilarity-index map with the area outside the model's area of "
+                      "applicability, a per-cell uncertainty map, the accuracy inside and outside "
+                      "that area, and a block-edge artefact index for coarse input layers.")
+        note.setWordWrap(True)
+        f.addRow(note)
+        v.addWidget(g)
+
         g = QGroupBox("Factors and map")
         f = QFormLayout(g)
         self.vif = QDoubleSpinBox(); self.vif.setRange(0, 100); self.vif.setValue(0); self.vif.setSpecialValueText("keep all factors")
@@ -375,6 +394,9 @@ class SettingsTab(QWidget):
         cfg.tune_search = self.search.currentText()
         cfg.tune_iter = self.n_iter.value()
         cfg.tune_inner_folds = self.inner.value()
+        cfg.tune_cv = self.tunecv.currentText()
+        cfg.reliability = self.rel.isChecked()
+        cfg.reliability_folds = self.relk.value()
         cfg.test_size = self.test.value() / 100
         cfg.cv_folds, cfg.cv_repeats = self.folds.value(), self.repeats.value()
         cfg.spatial_block_km = self.block.value() or None
@@ -405,6 +427,9 @@ class SettingsTab(QWidget):
         self.search.setCurrentText(cfg.tune_search)
         self.n_iter.setValue(cfg.tune_iter)
         self.inner.setValue(cfg.tune_inner_folds)
+        self.tunecv.setCurrentText(cfg.tune_cv)
+        self.rel.setChecked(cfg.reliability)
+        self.relk.setValue(cfg.reliability_folds)
         self.test.setValue(int(round(cfg.test_size * 100)))
         self.folds.setValue(cfg.cv_folds)
         self.repeats.setValue(cfg.cv_repeats)
@@ -512,7 +537,8 @@ class ResultsTab(QWidget):
         with open(os.path.join(out, "run_report.json")) as f:
             rep = json.load(f)
         ms = list(rep.get("methods", {}))
-        cols = ["Test AUC", "Accuracy", "Kappa", "k-fold CV AUC", "Spatial CV AUC", "Train AUC"]
+        cols = ["Test AUC", "Accuracy", "Kappa", "k-fold CV AUC", "Spatial CV AUC", "Train AUC",
+                "Outside AOA", "Mean SD"]
         self.table.setColumnCount(len(cols))
         self.table.setHorizontalHeaderLabels(cols)
         self.table.horizontalHeaderItem(3).setToolTip("Mean and SD over the outer folds of repeated k-fold CV")
@@ -528,6 +554,8 @@ class ResultsTab(QWidget):
                 a = e.get(k, {}).get("AUC")
                 vals.append(f"{a['mean']:.3f} ± {a['sd']:.3f}" if a else "-")
             vals.append(f"{e.get('train_auc', float('nan')):.3f}")
+            rl = rep.get("reliability", {}).get(m)
+            vals += [f"{rl['outside_aoa_pct']:.1f} %", f"{rl['uncertainty_sd_mean']:.3f}"] if rl else ["-", "-"]
             for c, val in enumerate(vals):
                 self.table.setItem(r, c, QTableWidgetItem(val))
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -537,7 +565,8 @@ class ResultsTab(QWidget):
                           f"non-landslide cells · runtime {rep.get('runtime_s', 0) / 60:.1f} min")
         self.figs.clear()
         for name, title in (("maps.png", "Maps"), ("roc_curves.png", "ROC"), ("cv_auc.png", "Cross-validation"),
-                            ("importance.png", "Importance"), ("pearson.png", "Correlation")):
+                            ("importance.png", "Importance"), ("pearson.png", "Correlation"),
+                            ("reliability.png", "Reliability")):
             p = os.path.join(out, "figures", name)
             if os.path.exists(p):
                 lab = QLabel()

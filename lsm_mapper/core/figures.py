@@ -26,6 +26,8 @@ def all_figures(run):
         if run.cfg.make_maps:
             map_panels(run, os.path.join(fdir, "maps.png"))
             interactive_map(run, os.path.join(run.out, "maps", "interactive_map.html"))
+            if run.report.get("reliability"):
+                reliability_figure(run, os.path.join(fdir, "reliability.png"))
     except Exception as e:  # figures never break a run
         run.log(f"Figure error: {e}")
 
@@ -192,3 +194,42 @@ def interactive_map(run, path, max_px=2000):
         f'<div style="position:fixed;bottom:25px;left:25px;z-index:9999;background:white;'
         f'padding:8px 10px;border-radius:4px;font:12px sans-serif">{legend}</div>'))
     fm.save(path)
+
+
+def reliability_figure(run, path):
+    """Per method: dissimilarity index with the area outside the AOA in grey,
+    and the CV-ensemble uncertainty (SD of probability)."""
+    rel = run.report["reliability"]
+    ms = [m for m in run.fitted if m in rel]
+    if not ms:
+        return
+    n = len(ms)
+    with rasterio.open(os.path.join(run.out, "maps", f"AOA_DI_{ms[0].replace(' ', '_')}.tif")) as src:
+        aspect = src.height / src.width
+    w = 3.0
+    fig, axes = plt.subplots(2, n, figsize=(w * n, 2 * (w * 0.85 * aspect + 0.7)), squeeze=False)
+    for j, m in enumerate(ms):
+        s = m.replace(" ", "_")
+        di, ext = read_small(os.path.join(run.out, "maps", f"AOA_DI_{s}.tif"))
+        mask, _ = read_small(os.path.join(run.out, "maps", f"AOA_mask_{s}.tif"))
+        sd, _ = read_small(os.path.join(run.out, "maps", f"Uncertainty_SD_{s}.tif"))
+        thr = rel[m]["threshold"]
+        a = np.where(mask == 1, di, np.nan)
+        ax = axes[0, j]
+        im = ax.imshow(a, cmap="viridis", vmin=0, vmax=thr, extent=ext, interpolation="nearest")
+        ax.imshow(np.where(mask == 2, 1.0, np.nan), cmap=ListedColormap(["#9e9e9e"]), extent=ext,
+                  interpolation="nearest")
+        ax.set_title(f"({chr(97 + j)}) {m}\nDI; grey = outside AOA ({rel[m]['outside_aoa_pct']:.1f}%)",
+                     fontsize=9)
+        fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
+        ax = axes[1, j]
+        im = ax.imshow(np.where(np.isfinite(sd), sd, np.nan), cmap="magma_r", vmin=0,
+                       vmax=np.nanquantile(sd, 0.99), extent=ext, interpolation="nearest")
+        ax.set_title(f"({chr(97 + n + j)}) {m}\nSD of fold-model probability", fontsize=9)
+        fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
+    for ax in axes.ravel():
+        ax.set_xticks([])
+        ax.set_yticks([])
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
