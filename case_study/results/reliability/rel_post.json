@@ -1,0 +1,62 @@
+{
+ "main|XGBoost": {
+  "outside_pct": 5.298703351551236,
+  "flat_outside_pct": 5.802817719498923,
+  "steep_outside_pct": 5.121036491136649,
+  "outside_that_is_flat_pct": 28.538471621444486,
+  "hv_on_flat_outside_pct": 3.325167142326246,
+  "hv_outside_pct": 4.209045980455877,
+  "sd_mean_flat": 0.027956999838352203,
+  "sd_mean_steep": 0.07773531973361969,
+  "sd_mean_hv_flat": 0.1234516128897667,
+  "sd_mean_hv_steep": 0.11072921752929688,
+  "sd_mean_inside": 0.06508685648441315,
+  "sd_mean_outside": 0.05898391455411911,
+  "spearman_di_sd": -0.0028597758555838743
+ },
+ "main|Random_Forest": {
+  "outside_pct": 5.436424948148432,
+  "flat_outside_pct": 5.064575725453311,
+  "steep_outside_pct": 5.567477122306465,
+  "outside_that_is_flat_pct": 24.27677876782997,
+  "hv_on_flat_outside_pct": 4.593925643273346,
+  "hv_outside_pct": 5.049446437719661,
+  "sd_mean_flat": 0.030433863401412964,
+  "sd_mean_steep": 0.06647206097841263,
+  "sd_mean_hv_flat": 0.07953188568353653,
+  "sd_mean_hv_steep": 0.08165857940912247,
+  "sd_mean_inside": 0.05728982016444206,
+  "sd_mean_outside": 0.05344473570585251,
+  "spearman_di_sd": 0.022605107615111076
+ },
+ "slope3|XGBoost": {
+  "outside_pct": 6.207808630591707,
+  "flat_outside_pct": 8.850154502728406,
+  "steep_outside_pct": 5.276557063326938,
+  "outside_that_is_flat_pct": 37.15129190014182,
+  "hv_on_flat_outside_pct": 10.179096694508878,
+  "hv_outside_pct": 7.806636710367954,
+  "sd_mean_flat": 0.09604641795158386,
+  "sd_mean_steep": 0.07076806575059891,
+  "sd_mean_hv_flat": 0.09892863035202026,
+  "sd_mean_hv_steep": 0.11312125623226166,
+  "sd_mean_inside": 0.07734617590904236,
+  "sd_mean_outside": 0.07749485969543457,
+  "spearman_di_sd": 0.0005906492953321275
+ },
+ "slope3|Random_Forest": {
+  "outside_pct": 6.339121229684483,
+  "flat_outside_pct": 8.444188497188696,
+  "steep_outside_pct": 5.59722471540422,
+  "outside_that_is_flat_pct": 34.71284830423179,
+  "hv_on_flat_outside_pct": 12.169169818026194,
+  "hv_outside_pct": 8.598669505273351,
+  "sd_mean_flat": 0.05205686762928963,
+  "sd_mean_steep": 0.06627634167671204,
+  "sd_mean_hv_flat": 0.062236230820417404,
+  "sd_mean_hv_steep": 0.09368380904197693,
+  "sd_mean_inside": 0.06305360049009323,
+  "sd_mean_outside": 0.05543823540210724,
+  "spearman_di_sd": -0.050684795782231826
+ }
+}

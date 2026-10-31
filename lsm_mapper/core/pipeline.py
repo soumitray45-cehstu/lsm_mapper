@@ -75,6 +75,7 @@ class RunConfig:
     reliability: bool = True
     reliability_methods: list | None = None   # None = every method
     reliability_folds: int = 5
+    reliability_reuse_maps: list | None = None  # methods whose DI/SD rasters may be reused
     # outputs
     make_maps: bool = True
     classification: str = "jenks"
@@ -113,7 +114,11 @@ class Run:
             with open(rp) as f:
                 self.prev = json.load(f)
             if not _same_settings(self.prev.get("config", {}), asdict(cfg)):
-                self.prev = {}          # settings changed: start again
+                # settings changed: start again, keeping the old report
+                shutil.copy(rp, os.path.join(self.out, time.strftime("run_report_replaced_%Y%m%d_%H%M%S.json")))
+                self.log("Settings differ from the run in this folder; starting again "
+                         "(previous report kept as run_report_replaced_*.json).")
+                self.prev = {}
 
     # ------------------------------------------------------------------ factors
     def _resume_factors(self):
@@ -489,16 +494,22 @@ class Run:
                 os.path.join(self.out, "tables", f"oof_spatial_{_slug(m)}.csv"), index=False)
             pd.DataFrame(by_di).to_csv(os.path.join(self.out, "tables", f"auc_by_di_{_slug(m)}.csv"),
                                        index=False)
-            DI = np.full(g.shape, np.nan, np.float32)
-            SD = np.full(g.shape, np.nan, np.float32)
-            for r0, h, vm, Xb in self._block_iter():
-                DI[r0:r0 + h][vm] = aoa.di(Xb)
-                P = np.stack([mm.predict_proba(Xb)[:, 1] for mm in models], 0)
-                SD[r0:r0 + h][vm] = P.std(0)
-            mask = np.where(np.isfinite(DI), np.where(DI <= aoa.threshold_, 1, 2), 0).astype("uint8")
-            raster.write_array(DI, g, files["AOA_DI"])
-            raster.write_array(mask, g, files["AOA_mask"], dtype="uint8", nodata=0)
-            raster.write_array(SD, g, files["Uncertainty_SD"])
+            if all(os.path.exists(f) for f in files.values()) and m in (cfg.reliability_reuse_maps or []):
+                # rasters from an interrupted run whose report entry was lost
+                DI = raster.read_band(files["AOA_DI"])
+                SD = raster.read_band(files["Uncertainty_SD"])
+                mask = np.where(np.isfinite(DI), np.where(DI <= aoa.threshold_, 1, 2), 0).astype("uint8")
+            else:
+                DI = np.full(g.shape, np.nan, np.float32)
+                SD = np.full(g.shape, np.nan, np.float32)
+                for r0, h, vm, Xb in self._block_iter():
+                    DI[r0:r0 + h][vm] = aoa.di(Xb)
+                    P = np.stack([mm.predict_proba(Xb)[:, 1] for mm in models], 0)
+                    SD[r0:r0 + h][vm] = P.std(0)
+                mask = np.where(np.isfinite(DI), np.where(DI <= aoa.threshold_, 1, 2), 0).astype("uint8")
+                raster.write_array(DI, g, files["AOA_DI"])
+                raster.write_array(mask, g, files["AOA_mask"], dtype="uint8", nodata=0)
+                raster.write_array(SD, g, files["Uncertainty_SD"])
             cls = raster.read_band(os.path.join(self.out, "maps", f"LSM_{_slug(m)}_classes.tif"))
             cls[cls == 0] = np.nan
             prob = raster.read_band(os.path.join(self.out, "maps", f"LSM_{_slug(m)}_probability.tif"))
@@ -559,7 +570,8 @@ class Run:
 
 
 # settings that only affect the reliability step, which re-runs on its own
-_LATE_KEYS = {"reliability", "reliability_methods", "reliability_folds", "resume", "n_jobs"}
+_LATE_KEYS = {"reliability", "reliability_methods", "reliability_folds", "reliability_reuse_maps",
+              "resume", "n_jobs", "output_dir"}
 
 
 def _same_settings(old: dict, new: dict) -> bool:

@@ -116,11 +116,13 @@ def corr_figure(csv, path):
     plt.close(fig)
 
 
-def read_small(path, max_px=1600):
+def read_small(path, max_px=1600, continuous=False):
     with rasterio.open(path) as s:
         f = max(1, int(np.ceil(max(s.height, s.width) / max_px)))
-        arr = s.read(1, out_shape=(s.height // f, s.width // f),
-                     resampling=rasterio.enums.Resampling.mode)
+        rs = rasterio.enums.Resampling.nearest if continuous else rasterio.enums.Resampling.mode
+        arr = s.read(1, out_shape=(s.height // f, s.width // f), resampling=rs, masked=continuous)
+        if continuous:
+            arr = arr.astype(np.float32).filled(np.nan)
         b = s.bounds
     return arr, (b.left, b.right, b.bottom, b.top)
 
@@ -210,16 +212,16 @@ def reliability_figure(run, path):
     fig, axes = plt.subplots(2, n, figsize=(w * n, 2 * (w * 0.85 * aspect + 0.7)), squeeze=False)
     for j, m in enumerate(ms):
         s = m.replace(" ", "_")
-        di, ext = read_small(os.path.join(run.out, "maps", f"AOA_DI_{s}.tif"))
+        di, ext = read_small(os.path.join(run.out, "maps", f"AOA_DI_{s}.tif"), continuous=True)
         mask, _ = read_small(os.path.join(run.out, "maps", f"AOA_mask_{s}.tif"))
-        sd, _ = read_small(os.path.join(run.out, "maps", f"Uncertainty_SD_{s}.tif"))
+        sd, _ = read_small(os.path.join(run.out, "maps", f"Uncertainty_SD_{s}.tif"), continuous=True)
         thr = rel[m]["threshold"]
         a = np.where(mask == 1, di, np.nan)
         ax = axes[0, j]
         im = ax.imshow(a, cmap="viridis", vmin=0, vmax=thr, extent=ext, interpolation="nearest")
-        ax.imshow(np.where(mask == 2, 1.0, np.nan), cmap=ListedColormap(["#9e9e9e"]), extent=ext,
+        ax.imshow(np.where(mask == 2, 1.0, np.nan), cmap=ListedColormap(["#e7298a"]), extent=ext,
                   interpolation="nearest")
-        ax.set_title(f"({chr(97 + j)}) {m}\nDI; grey = outside AOA ({rel[m]['outside_aoa_pct']:.1f}%)",
+        ax.set_title(f"({chr(97 + j)}) {m}\nDI; magenta = outside AOA ({rel[m]['outside_aoa_pct']:.1f}%)",
                      fontsize=9)
         fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
         ax = axes[1, j]

@@ -100,6 +100,18 @@
     "spatial_block_km": 10.0,
     "spatial_repeats": 5,
     "nested_cv": true,
+    "tune_cv": "random",
+    "reliability": true,
+    "reliability_methods": null,
+    "reliability_folds": 5,
+    "reliability_reuse_maps": [
+      "XGBoost",
+      "Random Forest",
+      "Logistic Regression",
+      "Frequency Ratio",
+      "Weights of Evidence",
+      "Information Value"
+    ],
     "make_maps": true,
     "classification": "jenks",
     "n_classes": 5,
@@ -212,6 +224,14 @@
       "errors": []
     }
   ],
+  "grid": {
+    "crs": "EPSG:32646",
+    "res_m": 30.0,
+    "width": 4661,
+    "height": 11031,
+    "valid_cells": 20876900,
+    "valid_area_km2": 18789.21
+  },
   "factor_names": [
     "Elevation",
     "Slope",
@@ -231,14 +251,6 @@
     "LULC",
     "Soil"
   ],
-  "grid": {
-    "crs": "EPSG:32646",
-    "res_m": 30.0,
-    "width": 4661,
-    "height": 11031,
-    "valid_cells": 20876900,
-    "valid_area_km2": 18789.21
-  },
   "samples": {
     "inventory": {
       "records": 730,
@@ -1591,6 +1603,854 @@
             "km2": 3757.842
           }
         ]
+      }
+    }
+  },
+  "reliability": {
+    "settings": {
+      "folds": 5,
+      "block_km": 10.0,
+      "weights": "permutation importance (equal weights if unavailable)",
+      "threshold": "upper whisker of cross-validated training DI"
+    },
+    "XGBoost": {
+      "weights_from": "XGBoost",
+      "weights": {
+        "Elevation": 0.64,
+        "Slope": 0.3364,
+        "Aspect": 0.0583,
+        "Curvature": 0.0,
+        "Plan_Curvature": 0.006,
+        "Profile_Curvature": 0.0,
+        "TWI": 0.2307,
+        "SPI": 0.0109,
+        "Dist_Drainage": 0.145,
+        "NDVI": 1.0,
+        "LULC": 0.0289,
+        "Rainfall": 0.8556,
+        "Soil": 0.0
+      },
+      "threshold": 0.32142913341522217,
+      "dbar": 1.9331323068518462,
+      "outside_aoa_pct": 5.298703351551236,
+      "landslides_outside_pct": 1.2949640287769784,
+      "high_vhigh_outside_pct": 4.209045980455877,
+      "outside_by_class_pct": [
+        6.203063127469099,
+        5.495901263267366,
+        4.682048191039087,
+        4.13869257793802,
+        4.317767320255704
+      ],
+      "oof_spatial_auc": 0.7828290461156254,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7828290461156254,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1323,
+          "AUC": 0.7794232588753137,
+          "landslide_share": 0.4965986394557823
+        },
+        {
+          "group": "outside AOA",
+          "n": 67,
+          "AUC": 0.8439201451905626,
+          "landslide_share": 0.5671641791044776
+        },
+        {
+          "group": "DI 0.047-0.119",
+          "n": 463,
+          "AUC": 0.778811659192825,
+          "landslide_share": 0.5183585313174947
+        },
+        {
+          "group": "DI 0.119-0.163",
+          "n": 463,
+          "AUC": 0.7896742378959953,
+          "landslide_share": 0.4838012958963283
+        },
+        {
+          "group": "DI 0.163-0.995",
+          "n": 464,
+          "AUC": 0.7757464281069432,
+          "landslide_share": 0.4978448275862069
+        }
+      ],
+      "uncertainty_sd_mean": 0.06476347893476486,
+      "uncertainty_sd_p90": 0.13660766184329987,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.018487991765141487,
+          "p90": 0.044074833393096924
+        },
+        {
+          "class": 2,
+          "mean": 0.06359942257404327,
+          "p90": 0.11031117290258408
+        },
+        {
+          "class": 3,
+          "mean": 0.09509311616420746,
+          "p90": 0.15109515190124512
+        },
+        {
+          "class": 4,
+          "mean": 0.11522097885608673,
+          "p90": 0.17538709938526154
+        },
+        {
+          "class": 5,
+          "mean": 0.1057213544845581,
+          "p90": 0.18127737939357758
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.16990451514720917,
+          "p90": 0.2792949080467224
+        },
+        {
+          "class": 2,
+          "mean": 0.16979196667671204,
+          "p90": 0.2749335467815399
+        },
+        {
+          "class": 3,
+          "mean": 0.16558648645877838,
+          "p90": 0.2658361494541168
+        },
+        {
+          "class": 4,
+          "mean": 0.16004465520381927,
+          "p90": 0.2589966058731079
+        },
+        {
+          "class": 5,
+          "mean": 0.15139491856098175,
+          "p90": 0.25044572353363037
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 0.9920493743935321,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.084535305218972,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 5.970800362868106,
+        "flat_in_high_vhigh_pct": 5.094500232245788
+      }
+    },
+    "Random Forest": {
+      "weights_from": "Random Forest",
+      "weights": {
+        "Elevation": 0.7205,
+        "Slope": 0.3609,
+        "Aspect": 0.0624,
+        "Curvature": 0.0055,
+        "Plan_Curvature": 0.0067,
+        "Profile_Curvature": 0.0126,
+        "TWI": 0.2342,
+        "SPI": 0.0102,
+        "Dist_Drainage": 0.1663,
+        "NDVI": 1.0,
+        "LULC": 0.0052,
+        "Rainfall": 0.3249,
+        "Soil": 0.0025
+      },
+      "threshold": 0.32225677371025085,
+      "dbar": 1.6782815705832803,
+      "outside_aoa_pct": 5.436424948148432,
+      "landslides_outside_pct": 1.870503597122302,
+      "high_vhigh_outside_pct": 5.049446437719661,
+      "outside_by_class_pct": [
+        4.598249654970002,
+        5.465607955926807,
+        6.587019596222227,
+        5.216950183404515,
+        4.717771910145291
+      ],
+      "oof_spatial_auc": 0.7837213394751824,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7837213394751824,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1311,
+          "AUC": 0.7778067447533565,
+          "landslide_share": 0.4935163996948894
+        },
+        {
+          "group": "outside AOA",
+          "n": 79,
+          "AUC": 0.8763440860215054,
+          "landslide_share": 0.6075949367088608
+        },
+        {
+          "group": "DI 0.048-0.124",
+          "n": 463,
+          "AUC": 0.8078372830752006,
+          "landslide_share": 0.49676025917926564
+        },
+        {
+          "group": "DI 0.124-0.171",
+          "n": 463,
+          "AUC": 0.769275416588654,
+          "landslide_share": 0.4708423326133909
+        },
+        {
+          "group": "DI 0.171-0.969",
+          "n": 464,
+          "AUC": 0.7720293289053901,
+          "landslide_share": 0.5323275862068966
+        }
+      ],
+      "uncertainty_sd_mean": 0.057080794125795364,
+      "uncertainty_sd_p90": 0.10525508224964142,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.01923271082341671,
+          "p90": 0.044681813567876816
+        },
+        {
+          "class": 2,
+          "mean": 0.05349794402718544,
+          "p90": 0.08643002063035965
+        },
+        {
+          "class": 3,
+          "mean": 0.06874143332242966,
+          "p90": 0.10824988037347794
+        },
+        {
+          "class": 4,
+          "mean": 0.08161226660013199,
+          "p90": 0.12592840194702148
+        },
+        {
+          "class": 5,
+          "mean": 0.0813107118010521,
+          "p90": 0.13380073010921478
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.16016915440559387,
+          "p90": 0.2488192617893219
+        },
+        {
+          "class": 2,
+          "mean": 0.17676852643489838,
+          "p90": 0.2778220772743225
+        },
+        {
+          "class": 3,
+          "mean": 0.1805018037557602,
+          "p90": 0.28912588953971863
+        },
+        {
+          "class": 4,
+          "mean": 0.1694636195898056,
+          "p90": 0.2695036232471466
+        },
+        {
+          "class": 5,
+          "mean": 0.15564028918743134,
+          "p90": 0.25059694051742554
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 0.9955022425397102,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.074199153435994,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.9354652685825355,
+        "flat_in_high_vhigh_pct": 7.129311550694192
+      }
+    },
+    "Logistic Regression": {
+      "weights_from": "Logistic Regression",
+      "weights": {
+        "Elevation": 0.2877,
+        "Slope": 0.0143,
+        "Aspect": 0.003,
+        "Curvature": 0.0545,
+        "Plan_Curvature": 0.0011,
+        "Profile_Curvature": 0.039,
+        "TWI": 1.0,
+        "SPI": 0.4982,
+        "Dist_Drainage": 0.1529,
+        "NDVI": 0.6144,
+        "LULC": 0.4748,
+        "Rainfall": 0.0182,
+        "Soil": 0.0356
+      },
+      "threshold": 0.3636888861656189,
+      "dbar": 1.6146883526435776,
+      "outside_aoa_pct": 7.839712792608098,
+      "landslides_outside_pct": 0.5755395683453237,
+      "high_vhigh_outside_pct": 3.525756263501279,
+      "outside_by_class_pct": [
+        22.61614457507242,
+        4.493789349799734,
+        2.439921248221542,
+        2.1170243222603244,
+        5.951016627320737
+      ],
+      "oof_spatial_auc": 0.7832575953625589,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7832575953625589,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1317,
+          "AUC": 0.7746963553415165,
+          "landslide_share": 0.5056947608200456
+        },
+        {
+          "group": "outside AOA",
+          "n": 73,
+          "AUC": 0.8793103448275863,
+          "landslide_share": 0.3972602739726027
+        },
+        {
+          "group": "DI 0.034-0.101",
+          "n": 463,
+          "AUC": 0.6710328497331429,
+          "landslide_share": 0.5421166306695464
+        },
+        {
+          "group": "DI 0.101-0.162",
+          "n": 463,
+          "AUC": 0.8184219399797684,
+          "landslide_share": 0.531317494600432
+        },
+        {
+          "group": "DI 0.162-0.847",
+          "n": 464,
+          "AUC": 0.8277701830333409,
+          "landslide_share": 0.4267241379310345
+        }
+      ],
+      "uncertainty_sd_mean": 0.03543621301651001,
+      "uncertainty_sd_p90": 0.06470710039138794,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.014419184066355228,
+          "p90": 0.032510410994291306
+        },
+        {
+          "class": 2,
+          "mean": 0.036335624754428864,
+          "p90": 0.06302499771118164
+        },
+        {
+          "class": 3,
+          "mean": 0.044638749212026596,
+          "p90": 0.07208311557769775
+        },
+        {
+          "class": 4,
+          "mean": 0.04597238451242447,
+          "p90": 0.07219769060611725
+        },
+        {
+          "class": 5,
+          "mean": 0.0381404273211956,
+          "p90": 0.06211676821112633
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.27327772974967957,
+          "p90": 0.4835990369319916
+        },
+        {
+          "class": 2,
+          "mean": 0.16517320275306702,
+          "p90": 0.28107672929763794
+        },
+        {
+          "class": 3,
+          "mean": 0.13923712074756622,
+          "p90": 0.23511996865272522
+        },
+        {
+          "class": 4,
+          "mean": 0.13396912813186646,
+          "p90": 0.22125491499900818
+        },
+        {
+          "class": 5,
+          "mean": 0.16355176270008087,
+          "p90": 0.2870917320251465
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 0.9978484371193146,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.1405841060933501,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.04568015156265,
+        "flat_in_high_vhigh_pct": 7.529138253243308
+      }
+    },
+    "Frequency Ratio": {
+      "weights_from": "Random Forest",
+      "weights": {
+        "Elevation": 0.7205,
+        "Slope": 0.3609,
+        "Aspect": 0.0624,
+        "Curvature": 0.0055,
+        "Plan_Curvature": 0.0067,
+        "Profile_Curvature": 0.0126,
+        "TWI": 0.2342,
+        "SPI": 0.0102,
+        "Dist_Drainage": 0.1663,
+        "NDVI": 1.0,
+        "LULC": 0.0052,
+        "Rainfall": 0.3249,
+        "Soil": 0.0025
+      },
+      "threshold": 0.32225677371025085,
+      "dbar": 1.6782815705832803,
+      "outside_aoa_pct": 5.436424948148432,
+      "landslides_outside_pct": 1.870503597122302,
+      "high_vhigh_outside_pct": 4.629383109228152,
+      "outside_by_class_pct": [
+        7.474109323053887,
+        5.946832630031836,
+        5.008969906676846,
+        5.028012361276176,
+        3.996990365981379
+      ],
+      "oof_spatial_auc": 0.7652688784224417,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7652688784224417,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1311,
+          "AUC": 0.75809808011024,
+          "landslide_share": 0.4935163996948894
+        },
+        {
+          "group": "outside AOA",
+          "n": 79,
+          "AUC": 0.8716397849462365,
+          "landslide_share": 0.6075949367088608
+        },
+        {
+          "group": "DI 0.048-0.124",
+          "n": 463,
+          "AUC": 0.7338122784101512,
+          "landslide_share": 0.49676025917926564
+        },
+        {
+          "group": "DI 0.124-0.171",
+          "n": 463,
+          "AUC": 0.7689945703051864,
+          "landslide_share": 0.4708423326133909
+        },
+        {
+          "group": "DI 0.171-0.969",
+          "n": 464,
+          "AUC": 0.7944551204313512,
+          "landslide_share": 0.5323275862068966
+        }
+      ],
+      "uncertainty_sd_mean": 0.038670364767313004,
+      "uncertainty_sd_p90": 0.062398333102464676,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.02025112509727478,
+          "p90": 0.03459211811423302
+        },
+        {
+          "class": 2,
+          "mean": 0.036052774637937546,
+          "p90": 0.055497508496046066
+        },
+        {
+          "class": 3,
+          "mean": 0.04333363473415375,
+          "p90": 0.0658029243350029
+        },
+        {
+          "class": 4,
+          "mean": 0.04594811424612999,
+          "p90": 0.06966400891542435
+        },
+        {
+          "class": 5,
+          "mean": 0.04212271049618721,
+          "p90": 0.06433804333209991
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.17940974235534668,
+          "p90": 0.2923154830932617
+        },
+        {
+          "class": 2,
+          "mean": 0.17870165407657623,
+          "p90": 0.28209561109542847
+        },
+        {
+          "class": 3,
+          "mean": 0.1723700612783432,
+          "p90": 0.27109494805336
+        },
+        {
+          "class": 4,
+          "mean": 0.1669476479291916,
+          "p90": 0.26629629731178284
+        },
+        {
+          "class": 5,
+          "mean": 0.15501464903354645,
+          "p90": 0.24474087357521057
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 0.9972314557282653,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.071525774746883,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.13920033080754,
+        "flat_in_high_vhigh_pct": 9.333082369410684
+      }
+    },
+    "Weights of Evidence": {
+      "weights_from": "Random Forest",
+      "weights": {
+        "Elevation": 0.7205,
+        "Slope": 0.3609,
+        "Aspect": 0.0624,
+        "Curvature": 0.0055,
+        "Plan_Curvature": 0.0067,
+        "Profile_Curvature": 0.0126,
+        "TWI": 0.2342,
+        "SPI": 0.0102,
+        "Dist_Drainage": 0.1663,
+        "NDVI": 1.0,
+        "LULC": 0.0052,
+        "Rainfall": 0.3249,
+        "Soil": 0.0025
+      },
+      "threshold": 0.32225677371025085,
+      "dbar": 1.6782815705832803,
+      "outside_aoa_pct": 5.436424948148432,
+      "landslides_outside_pct": 1.870503597122302,
+      "high_vhigh_outside_pct": 4.216970250499746,
+      "outside_by_class_pct": [
+        7.466378424029397,
+        6.991271688672806,
+        5.977811597116769,
+        4.868753607195996,
+        3.249999051510564
+      ],
+      "oof_spatial_auc": 0.7650411469385643,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7650411469385643,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1311,
+          "AUC": 0.7644829705219643,
+          "landslide_share": 0.4935163996948894
+        },
+        {
+          "group": "outside AOA",
+          "n": 79,
+          "AUC": 0.7883064516129032,
+          "landslide_share": 0.6075949367088608
+        },
+        {
+          "group": "DI 0.048-0.124",
+          "n": 463,
+          "AUC": 0.7306587049822728,
+          "landslide_share": 0.49676025917926564
+        },
+        {
+          "group": "DI 0.124-0.171",
+          "n": 463,
+          "AUC": 0.7801160831305,
+          "landslide_share": 0.4708423326133909
+        },
+        {
+          "group": "DI 0.171-0.969",
+          "n": 464,
+          "AUC": 0.7823280285079945,
+          "landslide_share": 0.5323275862068966
+        }
+      ],
+      "uncertainty_sd_mean": 0.029095154255628586,
+      "uncertainty_sd_p90": 0.04565214738249779,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.014077001251280308,
+          "p90": 0.02464682050049305
+        },
+        {
+          "class": 2,
+          "mean": 0.029429424554109573,
+          "p90": 0.043889857828617096
+        },
+        {
+          "class": 3,
+          "mean": 0.0349082350730896,
+          "p90": 0.05349092558026314
+        },
+        {
+          "class": 4,
+          "mean": 0.033149391412734985,
+          "p90": 0.050559379160404205
+        },
+        {
+          "class": 5,
+          "mean": 0.027025027200579643,
+          "p90": 0.04031819477677345
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.17831863462924957,
+          "p90": 0.28749391436576843
+        },
+        {
+          "class": 2,
+          "mean": 0.17646048963069916,
+          "p90": 0.2924728989601135
+        },
+        {
+          "class": 3,
+          "mean": 0.18376371264457703,
+          "p90": 0.2865288555622101
+        },
+        {
+          "class": 4,
+          "mean": 0.16849260032176971,
+          "p90": 0.2654707431793213
+        },
+        {
+          "class": 5,
+          "mean": 0.15051595866680145,
+          "p90": 0.23153436183929443
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 1.003248010023445,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.094027649939585,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 4.106638044198379,
+        "flat_in_high_vhigh_pct": 7.906135571617819
+      }
+    },
+    "Information Value": {
+      "weights_from": "Random Forest",
+      "weights": {
+        "Elevation": 0.7205,
+        "Slope": 0.3609,
+        "Aspect": 0.0624,
+        "Curvature": 0.0055,
+        "Plan_Curvature": 0.0067,
+        "Profile_Curvature": 0.0126,
+        "TWI": 0.2342,
+        "SPI": 0.0102,
+        "Dist_Drainage": 0.1663,
+        "NDVI": 1.0,
+        "LULC": 0.0052,
+        "Rainfall": 0.3249,
+        "Soil": 0.0025
+      },
+      "threshold": 0.32225677371025085,
+      "dbar": 1.6782815705832803,
+      "outside_aoa_pct": 5.436424948148432,
+      "landslides_outside_pct": 1.870503597122302,
+      "high_vhigh_outside_pct": 4.365304410747232,
+      "outside_by_class_pct": [
+        7.389044548137966,
+        6.9271370781698405,
+        5.78256522445073,
+        4.744906668675601,
+        3.8217436190278584
+      ],
+      "oof_spatial_auc": 0.7673060400600383,
+      "auc_by_di": [
+        {
+          "group": "all",
+          "n": 1390,
+          "AUC": 0.7673060400600383,
+          "landslide_share": 0.5
+        },
+        {
+          "group": "inside AOA",
+          "n": 1311,
+          "AUC": 0.7663730656784791,
+          "landslide_share": 0.4935163996948894
+        },
+        {
+          "group": "outside AOA",
+          "n": 79,
+          "AUC": 0.7856182795698925,
+          "landslide_share": 0.6075949367088608
+        },
+        {
+          "group": "DI 0.048-0.124",
+          "n": 463,
+          "AUC": 0.7343347639484978,
+          "landslide_share": 0.49676025917926564
+        },
+        {
+          "group": "DI 0.124-0.171",
+          "n": 463,
+          "AUC": 0.780527991012919,
+          "landslide_share": 0.4708423326133909
+        },
+        {
+          "group": "DI 0.171-0.969",
+          "n": 464,
+          "AUC": 0.782421313830482,
+          "landslide_share": 0.5323275862068966
+        }
+      ],
+      "uncertainty_sd_mean": 0.02984720468521118,
+      "uncertainty_sd_p90": 0.04649198427796364,
+      "uncertainty_by_class": [
+        {
+          "class": 1,
+          "mean": 0.014724531210958958,
+          "p90": 0.025535758584737778
+        },
+        {
+          "class": 2,
+          "mean": 0.03048059344291687,
+          "p90": 0.04530631750822067
+        },
+        {
+          "class": 3,
+          "mean": 0.03609594702720642,
+          "p90": 0.054931603372097015
+        },
+        {
+          "class": 4,
+          "mean": 0.03397490084171295,
+          "p90": 0.0514577180147171
+        },
+        {
+          "class": 5,
+          "mean": 0.02721751295030117,
+          "p90": 0.040483277291059494
+        }
+      ],
+      "di_by_class": [
+        {
+          "class": 1,
+          "mean": 0.17768564820289612,
+          "p90": 0.28640076518058777
+        },
+        {
+          "class": 2,
+          "mean": 0.1763841211795807,
+          "p90": 0.2916536033153534
+        },
+        {
+          "class": 3,
+          "mean": 0.18294629454612732,
+          "p90": 0.28459084033966064
+        },
+        {
+          "class": 4,
+          "mean": 0.16796447336673737,
+          "p90": 0.2640130817890167
+        },
+        {
+          "class": 5,
+          "mean": 0.15358898043632507,
+          "p90": 0.24077674746513367
+        }
+      ],
+      "artefact_index": {
+        "Rainfall": {
+          "index": 1.002942815165508,
+          "edge_pairs": 235574
+        },
+        "Soil": {
+          "index": 1.0510261938970993,
+          "edge_pairs": 1563838
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 3.926127621373623,
+        "flat_in_high_vhigh_pct": 7.646593780518447
       }
     }
   },

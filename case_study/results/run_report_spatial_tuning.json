@@ -1,0 +1,641 @@
+{
+  "software": "LSM Mapper",
+  "version": "2.0.0",
+  "python": "3.13.18",
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "rasterio": "1.5.2",
+    "geopandas": "1.2.0",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "numba": "0.68.1",
+    "jenkspy": "0.4.1"
+  },
+  "started": "2026-11-01 05:26:18",
+  "config": {
+    "dem": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/DEM.tif",
+    "inventory": "/mnt/user-data/uploads/LSM_Chattogram/Inventory/Landslide_Inventory_UTM46N.shp",
+    "output_dir": "/home/lsm/case/tune_spatial",
+    "roi": null,
+    "factors": [
+      {
+        "name": "NDVI",
+        "paths": [
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip00.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip01.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip02.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip03.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip04.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip05.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip06.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip07.tif"
+        ],
+        "kind": "continuous",
+        "resampling": "nearest"
+      },
+      {
+        "name": "LULC",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000000000-0000000000.tif",
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000032768-0000000000.tif"
+        ],
+        "kind": "categorical"
+      },
+      {
+        "name": "Rainfall",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Rainfall.tif"
+        ],
+        "kind": "continuous",
+        "smooth_to_m": 5500
+      },
+      {
+        "name": "Soil",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Soil.tif"
+        ],
+        "kind": "categorical"
+      }
+    ],
+    "dem_factors": [
+      "Elevation",
+      "Slope",
+      "Aspect",
+      "Curvature",
+      "Plan_Curvature",
+      "Profile_Curvature",
+      "TWI",
+      "SPI",
+      "Dist_Drainage"
+    ],
+    "stream_area_km2": 1.0,
+    "target_crs": null,
+    "target_res": null,
+    "absence_ratio": 1.0,
+    "absence_region": "study_area",
+    "absence_min_slope": null,
+    "absence_buffer_m": 100.0,
+    "seed": 42,
+    "test_size": 0.3,
+    "methods": [
+      "XGBoost",
+      "Random Forest"
+    ],
+    "params": {},
+    "search_spaces": {},
+    "exclude_factors": [],
+    "vif_screen": null,
+    "tune": true,
+    "tune_search": "random",
+    "tune_iter": 30,
+    "tune_inner_folds": 3,
+    "cv_folds": 5,
+    "cv_repeats": 2,
+    "spatial_block_km": 10.0,
+    "spatial_repeats": 5,
+    "nested_cv": true,
+    "tune_cv": "spatial",
+    "reliability": false,
+    "reliability_methods": null,
+    "reliability_folds": 5,
+    "reliability_reuse_maps": null,
+    "make_maps": false,
+    "classification": "jenks",
+    "n_classes": 5,
+    "n_jobs": -1,
+    "resume": true
+  },
+  "notes": [],
+  "layer_checks": [
+    {
+      "name": "NDVI",
+      "path": "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip00.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        30.0,
+        30.0
+      ],
+      "shape": [
+        1379,
+        4661
+      ],
+      "dtype": "float32",
+      "nodata": NaN,
+      "categorical": false,
+      "overlap_pct": 99.99,
+      "res_ratio": 1.0,
+      "resampling": "bilinear",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [],
+      "errors": []
+    },
+    {
+      "name": "LULC",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000000000-0000000000.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        10.0,
+        10.0
+      ],
+      "shape": [
+        32768,
+        13980
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": true,
+      "overlap_pct": 99.98,
+      "res_ratio": 0.333,
+      "resampling": "mode",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [
+        "Categorical layer stored as floating point; values are rounded to class codes."
+      ],
+      "errors": []
+    },
+    {
+      "name": "Rainfall",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Rainfall.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        30.0,
+        30.0
+      ],
+      "shape": [
+        11031,
+        4661
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": false,
+      "overlap_pct": 100.0,
+      "res_ratio": 1.0,
+      "resampling": "bilinear",
+      "fill_values_found": 0,
+      "effective_res_m": 5100.0,
+      "warnings": [
+        "Stored at 30 m but values change only every ~5100 m (layer was up-sampled before export). Block edges can appear in the susceptibility map."
+      ],
+      "errors": []
+    },
+    {
+      "name": "Soil",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Soil.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        250.0,
+        250.0
+      ],
+      "shape": [
+        1325,
+        560
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": true,
+      "overlap_pct": 100.0,
+      "res_ratio": 8.333,
+      "resampling": "nearest",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [
+        "Categorical layer stored as floating point; values are rounded to class codes.",
+        "Native resolution is 8x coarser than the DEM. Block edges can appear in the susceptibility map."
+      ],
+      "errors": []
+    }
+  ],
+  "grid": {
+    "crs": "EPSG:32646",
+    "res_m": 30.0,
+    "width": 4661,
+    "height": 11031,
+    "valid_cells": 20876900,
+    "valid_area_km2": 18789.21
+  },
+  "factor_names": [
+    "Elevation",
+    "Slope",
+    "Aspect",
+    "Curvature",
+    "Plan_Curvature",
+    "Profile_Curvature",
+    "TWI",
+    "SPI",
+    "Dist_Drainage",
+    "NDVI",
+    "LULC",
+    "Rainfall",
+    "Soil"
+  ],
+  "categorical": [
+    "LULC",
+    "Soil"
+  ],
+  "samples": {
+    "inventory": {
+      "records": 730,
+      "outside_grid": 0,
+      "on_nodata": 13,
+      "duplicate_cells": 22,
+      "landslide_cells": 695
+    },
+    "absence": {
+      "eligible_cells": 20858861,
+      "sampled": 695,
+      "region": "study_area",
+      "min_slope_deg": null,
+      "buffer_m": 100.0,
+      "seed": 42
+    },
+    "rows": 1390,
+    "landslide": 695,
+    "non_landslide": 695,
+    "mean_slope_landslide": 13.626947402954102,
+    "mean_slope_non_landslide": 8.95086669921875
+  },
+  "vif": {
+    "Curvature": 436.375,
+    "Profile_Curvature": 170.692,
+    "Plan_Curvature": 128.017,
+    "TWI": 6.501,
+    "SPI": 5.506,
+    "Slope": 5.126,
+    "NDVI": 2.915,
+    "LULC": 2.538,
+    "Elevation": 1.87,
+    "Dist_Drainage": 1.135,
+    "Soil": 1.081,
+    "Rainfall": 1.068,
+    "Aspect": 1.015
+  },
+  "split": {
+    "train": 973,
+    "test": 417
+  },
+  "methods": {
+    "XGBoost": {
+      "tuning": {
+        "best_inner_auc": 0.7827690793486702,
+        "best_params": {
+          "subsample": 0.6,
+          "reg_lambda": 5.0,
+          "n_estimators": 500,
+          "min_child_weight": 5,
+          "max_depth": 6,
+          "learning_rate": 0.01,
+          "colsample_bytree": 0.7
+        }
+      },
+      "default_params": {
+        "n_estimators": 300,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 1,
+        "reg_lambda": 1.0
+      },
+      "test_default": {
+        "AUC": 0.8766332351858668,
+        "Accuracy": 0.8033573141486811,
+        "Sensitivity": 0.8076923076923077,
+        "Specificity": 0.7990430622009569,
+        "Precision": 0.8,
+        "F1": 0.8038277511961722,
+        "Kappa": 0.6067214132910081,
+        "TP": 168,
+        "TN": 167,
+        "FP": 42,
+        "FN": 40
+      },
+      "params": {
+        "n_estimators": 500,
+        "learning_rate": 0.01,
+        "max_depth": 6,
+        "subsample": 0.6,
+        "colsample_bytree": 0.7,
+        "min_child_weight": 5,
+        "reg_lambda": 5.0
+      },
+      "test": {
+        "AUC": 0.8675009201324991,
+        "Accuracy": 0.7889688249400479,
+        "Sensitivity": 0.7644230769230769,
+        "Specificity": 0.8133971291866029,
+        "Precision": 0.803030303030303,
+        "F1": 0.7832512315270936,
+        "Kappa": 0.5778866726482159,
+        "TP": 159,
+        "TN": 170,
+        "FP": 39,
+        "FN": 49
+      },
+      "train_auc": 0.9650586018370642,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8741162465710886,
+          "sd": 0.02402163772521264
+        },
+        "Accuracy": {
+          "mean": 0.7946043165467626,
+          "sd": 0.023947819026030166
+        },
+        "Sensitivity": {
+          "mean": 0.787769784172662,
+          "sd": 0.04239249287689134
+        },
+        "Specificity": {
+          "mean": 0.8014388489208633,
+          "sd": 0.029798032742463426
+        },
+        "Precision": {
+          "mean": 0.7991111920358908,
+          "sd": 0.024616556508765947
+        },
+        "F1": {
+          "mean": 0.7928303287845101,
+          "sd": 0.0270661173535522
+        },
+        "Kappa": {
+          "mean": 0.5892086330935251,
+          "sd": 0.0478956380520603
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7789361003024858,
+          "sd": 0.05243121788704392
+        },
+        "Accuracy": {
+          "mean": 0.7038565559583135,
+          "sd": 0.05351686768411164
+        },
+        "Sensitivity": {
+          "mean": 0.6148971289212374,
+          "sd": 0.13601898099950901
+        },
+        "Specificity": {
+          "mean": 0.7930358924209763,
+          "sd": 0.0522052625607346
+        },
+        "Precision": {
+          "mean": 0.7468910895596106,
+          "sd": 0.03693767712308066
+        },
+        "F1": {
+          "mean": 0.6668013835067884,
+          "sd": 0.09525986954951966
+        },
+        "Kappa": {
+          "mean": 0.40789773159484866,
+          "sd": 0.1065868728230345
+        }
+      },
+      "importance": {
+        "Factor": [
+          "NDVI",
+          "Elevation",
+          "Rainfall",
+          "Slope",
+          "TWI",
+          "Dist_Drainage",
+          "Aspect",
+          "SPI",
+          "Plan_Curvature",
+          "LULC",
+          "Curvature",
+          "Profile_Curvature",
+          "Soil"
+        ],
+        "Gain": [
+          0.13522,
+          0.13722,
+          0.0931,
+          0.11379,
+          0.10011,
+          0.077,
+          0.04549,
+          0.05213,
+          0.0436,
+          0.06598,
+          0.03381,
+          0.04914,
+          0.05341
+        ],
+        "Permutation_mean": [
+          0.09933,
+          0.06284,
+          0.04557,
+          0.04554,
+          0.0277,
+          0.01658,
+          0.00325,
+          0.00186,
+          0.00048,
+          -0.00023,
+          -0.00046,
+          -0.00088,
+          -0.0009
+        ],
+        "Permutation_sd": [
+          0.01515,
+          0.01404,
+          0.0064,
+          0.0091,
+          0.00726,
+          0.00598,
+          0.00223,
+          0.00158,
+          0.00083,
+          0.00071,
+          0.00037,
+          0.00158,
+          0.00117
+        ]
+      }
+    },
+    "Random Forest": {
+      "tuning": {
+        "best_inner_auc": 0.7933432105353723,
+        "best_params": {
+          "n_estimators": 300,
+          "min_samples_leaf": 10,
+          "max_features": "sqrt",
+          "max_depth": 12
+        }
+      },
+      "default_params": {
+        "n_estimators": 500,
+        "max_depth": null,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "class_weight": "balanced"
+      },
+      "test_default": {
+        "AUC": 0.8650280640412219,
+        "Accuracy": 0.7913669064748201,
+        "Sensitivity": 0.7740384615384616,
+        "Specificity": 0.8086124401913876,
+        "Precision": 0.8009950248756219,
+        "F1": 0.7872860635696821,
+        "Kappa": 0.5826978156596156,
+        "TP": 161,
+        "TN": 169,
+        "FP": 40,
+        "FN": 47
+      },
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 12,
+        "min_samples_leaf": 10,
+        "max_features": "sqrt",
+        "class_weight": "balanced"
+      },
+      "test": {
+        "AUC": 0.8556312108943688,
+        "Accuracy": 0.7865707434052758,
+        "Sensitivity": 0.7307692307692307,
+        "Specificity": 0.8421052631578947,
+        "Precision": 0.8216216216216217,
+        "F1": 0.7735368956743003,
+        "Kappa": 0.5730260811541514,
+        "TP": 152,
+        "TN": 176,
+        "FP": 33,
+        "FN": 56
+      },
+      "train_auc": 0.9607025460322289,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8633404068112416,
+          "sd": 0.024365916787537675
+        },
+        "Accuracy": {
+          "mean": 0.7866906474820144,
+          "sd": 0.01926317861710449
+        },
+        "Sensitivity": {
+          "mean": 0.7755395683453237,
+          "sd": 0.03727455007717113
+        },
+        "Specificity": {
+          "mean": 0.797841726618705,
+          "sd": 0.03961555210317832
+        },
+        "Precision": {
+          "mean": 0.79461064727944,
+          "sd": 0.030129855296899103
+        },
+        "F1": {
+          "mean": 0.7841126240681093,
+          "sd": 0.02001511374402408
+        },
+        "Kappa": {
+          "mean": 0.5733812949640289,
+          "sd": 0.038526357234209004
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7936998738737153,
+          "sd": 0.043887135789303054
+        },
+        "Accuracy": {
+          "mean": 0.7183574413489622,
+          "sd": 0.038619200220341085
+        },
+        "Sensitivity": {
+          "mean": 0.6374849538192332,
+          "sd": 0.1062732380048953
+        },
+        "Specificity": {
+          "mean": 0.7993662316520649,
+          "sd": 0.04998357466860208
+        },
+        "Precision": {
+          "mean": 0.7619649477072188,
+          "sd": 0.029124384904309866
+        },
+        "F1": {
+          "mean": 0.689170179127768,
+          "sd": 0.06410781782239496
+        },
+        "Kappa": {
+          "mean": 0.4367950897738052,
+          "sd": 0.07716886497784776
+        }
+      },
+      "importance": {
+        "Factor": [
+          "NDVI",
+          "Elevation",
+          "TWI",
+          "Slope",
+          "Rainfall",
+          "Dist_Drainage",
+          "Aspect",
+          "SPI",
+          "Curvature",
+          "LULC",
+          "Profile_Curvature",
+          "Plan_Curvature",
+          "Soil"
+        ],
+        "Impurity": [
+          0.17252,
+          0.19732,
+          0.12261,
+          0.12278,
+          0.10979,
+          0.07086,
+          0.03723,
+          0.05153,
+          0.02293,
+          0.01045,
+          0.03813,
+          0.02855,
+          0.01529
+        ],
+        "Permutation_mean": [
+          0.11213,
+          0.05039,
+          0.03853,
+          0.03131,
+          0.02681,
+          0.01843,
+          0.00642,
+          0.00281,
+          0.00075,
+          0.00066,
+          0.00066,
+          0.00046,
+          -0.00028
+        ],
+        "Permutation_sd": [
+          0.01663,
+          0.0116,
+          0.00869,
+          0.00918,
+          0.00352,
+          0.00675,
+          0.00251,
+          0.00208,
+          0.00107,
+          0.00088,
+          0.0015,
+          0.00125,
+          0.00153
+        ]
+      }
+    }
+  }
+}
