@@ -61,6 +61,24 @@ methods = ["XGBoost", "Random Forest", "Logistic Regression", "Frequency Ratio"]
 y = df.label.to_numpy()
 xy = df[["x", "y"]].to_numpy()
 rows = []
+PART = os.path.join(out, "sensitivity_partial.csv")
+done = pd.read_csv(PART) if os.path.exists(PART) else pd.DataFrame(columns=["analysis", "variant", "method", "scheme", "auc", "sd"])
+
+
+def record(r):
+    global done
+    rows.append(r)
+    done = pd.concat([done, pd.DataFrame([r])], ignore_index=True)
+    done.to_csv(PART, index=False)
+    print(r, flush=True)
+
+
+def have(a, v, m, sc):
+    d = done[(done.analysis == a) & (done.variant == v) & (done.method == m) & (done.scheme == sc)]
+    if len(d):
+        rows.append(d.iloc[0].to_dict())
+        return True
+    return False
 
 
 def cv(m, feats, params, scheme, block_km=10, repeats=5):
@@ -76,20 +94,23 @@ def cv(m, feats, params, scheme, block_km=10, repeats=5):
 for name, feats in sets.items():
     for m in methods:
         for scheme in ("kfold", "spatial"):
+            if have("factor set", name, m, scheme):
+                continue
             mu, sd = cv(m, feats, tuned.get(m), scheme)
-            rows.append(dict(analysis="factor set", variant=name, method=m, scheme=scheme, auc=mu, sd=sd))
-            print(rows[-1], flush=True)
+            record(dict(analysis="factor set", variant=name, method=m, scheme=scheme, auc=mu, sd=sd))
 for bk in (5, 10, 20):
     for m in methods:
+        if have("block size", f"{bk} km", m, "spatial"):
+            continue
         mu, sd = cv(m, all_f, tuned.get(m), "spatial", block_km=bk)
-        rows.append(dict(analysis="block size", variant=f"{bk} km", method=m, scheme="spatial", auc=mu, sd=sd))
-        print(rows[-1], flush=True)
+        record(dict(analysis="block size", variant=f"{bk} km", method=m, scheme="spatial", auc=mu, sd=sd))
 for m in ("XGBoost", "Random Forest", "Logistic Regression"):
     for lab, p in (("default", None), ("tuned", tuned[m])):
         for scheme in ("kfold", "spatial"):
+            if have("parameters", lab, m, scheme):
+                continue
             mu, sd = cv(m, all_f, p, scheme)
-            rows.append(dict(analysis="parameters", variant=lab, method=m, scheme=scheme, auc=mu, sd=sd))
-            print(rows[-1], flush=True)
+            record(dict(analysis="parameters", variant=lab, method=m, scheme=scheme, auc=mu, sd=sd))
 res = pd.DataFrame(rows)
 res.to_csv(os.path.join(out, "sensitivity.csv"), index=False)
 json.dump({"vif_kept": vif_keep, "vif_dropped": vif_drop}, open(os.path.join(out, "vif_screen.json"), "w"), indent=1)

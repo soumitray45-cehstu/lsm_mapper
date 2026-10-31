@@ -1,0 +1,57 @@
+analysis,variant,method,scheme,auc,sd
+factor set,All 13 factors,XGBoost,kfold,0.9030257233062472,0.0162944431178521
+factor set,All 13 factors,XGBoost,spatial,0.796876026435409,0.0552567230525884
+factor set,All 13 factors,Random Forest,kfold,0.8746348532684644,0.0217051661299034
+factor set,All 13 factors,Random Forest,spatial,0.797001761086587,0.0446701312032212
+factor set,All 13 factors,Logistic Regression,kfold,0.8093887479944102,0.0256312082061694
+factor set,All 13 factors,Logistic Regression,spatial,0.7829028816276662,0.0319137472137323
+factor set,All 13 factors,Frequency Ratio,kfold,0.8333812949640287,0.0280652361200895
+factor set,All 13 factors,Frequency Ratio,spatial,0.7725254051324758,0.0359164577091156
+factor set,VIF-screened (11 factors),XGBoost,kfold,0.9074043786553492,0.0143049206073817
+factor set,VIF-screened (11 factors),XGBoost,spatial,0.7919407766033845,0.0574372388240051
+factor set,VIF-screened (11 factors),Random Forest,kfold,0.8840784638476269,0.0196718020055157
+factor set,VIF-screened (11 factors),Random Forest,spatial,0.7904505333991264,0.0488679161944093
+factor set,VIF-screened (11 factors),Logistic Regression,kfold,0.7916049893897831,0.0296842402506244
+factor set,VIF-screened (11 factors),Logistic Regression,spatial,0.7622922928978575,0.0324823197197609
+factor set,VIF-screened (11 factors),Frequency Ratio,kfold,0.8396107861911909,0.0265643372072613
+factor set,VIF-screened (11 factors),Frequency Ratio,spatial,0.7689456587167157,0.0363787669363417
+factor set,Without Rainfall and Soil,XGBoost,kfold,0.8569038869623725,0.0223828269331056
+factor set,Without Rainfall and Soil,XGBoost,spatial,0.8134607622311207,0.0273107877730785
+factor set,Without Rainfall and Soil,Random Forest,kfold,0.848962269033694,0.0237056812233236
+factor set,Without Rainfall and Soil,Random Forest,spatial,0.8134394809137419,0.032906754142897
+factor set,Without Rainfall and Soil,Logistic Regression,kfold,0.8086910615392578,0.0257570014829899
+factor set,Without Rainfall and Soil,Logistic Regression,spatial,0.790267430601098,0.0388313100034115
+factor set,Without Rainfall and Soil,Frequency Ratio,kfold,0.7992857512551109,0.0315089688330119
+factor set,Without Rainfall and Soil,Frequency Ratio,spatial,0.770705622419389,0.0269296657791086
+factor set,Raw (blocky) rainfall,XGBoost,kfold,0.9184597070545004,0.0167287480085685
+factor set,Raw (blocky) rainfall,XGBoost,spatial,0.8186607622602746,0.0590007613253859
+factor set,Raw (blocky) rainfall,Random Forest,kfold,0.8743191346203614,0.0216209723075488
+factor set,Raw (blocky) rainfall,Random Forest,spatial,0.8025043278317956,0.04205400629594409
+factor set,Raw (blocky) rainfall,Logistic Regression,kfold,0.8104652968272865,0.025400932487004785
+factor set,Raw (blocky) rainfall,Logistic Regression,spatial,0.7855363599992664,0.03132049011411502
+factor set,Raw (blocky) rainfall,Frequency Ratio,kfold,0.8185870296568502,0.02833293370968321
+factor set,Raw (blocky) rainfall,Frequency Ratio,spatial,0.761051007590366,0.037066133558275885
+block size,5 km,XGBoost,spatial,0.826051325733592,0.04391221313697148
+block size,5 km,Random Forest,spatial,0.8238674071072871,0.0286696589146124
+block size,5 km,Logistic Regression,spatial,0.791151220738486,0.03305066482168559
+block size,5 km,Frequency Ratio,spatial,0.7950042245449311,0.04001813747180876
+block size,10 km,XGBoost,spatial,0.796876026435409,0.05525672305258848
+block size,10 km,Random Forest,spatial,0.7970028037307327,0.044671402697523864
+block size,10 km,Logistic Regression,spatial,0.7829028816276662,0.03191374721373233
+block size,10 km,Frequency Ratio,spatial,0.7725254051324758,0.03591645770911562
+block size,20 km,XGBoost,spatial,0.772137397330367,0.0766098980950363
+block size,20 km,Random Forest,spatial,0.7784315817597874,0.04181894984057384
+block size,20 km,Logistic Regression,spatial,0.785779191676173,0.05185967775472485
+block size,20 km,Frequency Ratio,spatial,0.7667802719785541,0.05122111524838461
+parameters,default,XGBoost,kfold,0.9050753066611459,0.015991045004010055
+parameters,default,XGBoost,spatial,0.7882505604887183,0.054220476384741915
+parameters,tuned,XGBoost,kfold,0.9030257233062471,0.016294443117852175
+parameters,tuned,XGBoost,spatial,0.796876026435409,0.05525672305258848
+parameters,default,Random Forest,kfold,0.8758604627089696,0.021508651808662543
+parameters,default,Random Forest,spatial,0.7985859088453431,0.04113615887939507
+parameters,tuned,Random Forest,kfold,0.8746348532684644,0.021705166129903423
+parameters,tuned,Random Forest,spatial,0.797001761086587,0.044670131203221296
+parameters,default,Logistic Regression,kfold,0.8063537084001864,0.025593656403103397
+parameters,default,Logistic Regression,spatial,0.7786605245467692,0.02917553717664893
+parameters,tuned,Logistic Regression,kfold,0.8093887479944102,0.02563120820616949
+parameters,tuned,Logistic Regression,spatial,0.7829028816276662,0.03191374721373233

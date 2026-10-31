@@ -1,0 +1,17 @@
+map,edges_of,artefact_index,edge_pairs
+XGBoost|main,rain,0.9912675808083448,236367
+XGBoost|main,soil,1.084535310110725,1563838
+Random_Forest|main,rain,0.9948263894643506,236367
+Random_Forest|main,soil,1.0741991015766021,1563838
+Logistic_Regression|main,rain,0.9975965596455498,236367
+Logistic_Regression|main,soil,1.1405840790560418,1563838
+Frequency_Ratio|main,rain,0.9972205563495226,236367
+Frequency_Ratio|main,soil,1.0715257870172497,1563838
+XGBoost|raw_rain,rain,1.2078729367629073,236367
+XGBoost|raw_rain,soil,1.0872477982020228,1563838
+XGBoost|no_rain_soil,rain,0.9948127662038342,236367
+XGBoost|no_rain_soil,soil,1.0442591400230619,1563838
+Random_Forest|raw_rain,rain,1.0616035793829053,236367
+Random_Forest|raw_rain,soil,1.063780073610579,1563838
+Random_Forest|no_rain_soil,rain,0.9939897736480398,236367
+Random_Forest|no_rain_soil,soil,1.0440409075193549,1563838

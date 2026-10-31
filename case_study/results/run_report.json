@@ -1,0 +1,1599 @@
+{
+  "software": "LSM Mapper",
+  "version": "2.0.0",
+  "python": "3.13.18",
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "rasterio": "1.5.2",
+    "geopandas": "1.2.0",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "numba": "0.68.1",
+    "jenkspy": "0.4.1"
+  },
+  "started": "2026-10-31 23:02:21",
+  "config": {
+    "dem": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/DEM.tif",
+    "inventory": "/mnt/user-data/uploads/LSM_Chattogram/Inventory/Landslide_Inventory_UTM46N.shp",
+    "output_dir": "/home/lsm/case/main",
+    "roi": null,
+    "factors": [
+      {
+        "name": "NDVI",
+        "paths": [
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip00.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip01.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip02.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip03.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip04.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip05.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip06.tif",
+          "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip07.tif"
+        ],
+        "kind": "continuous",
+        "resampling": "nearest"
+      },
+      {
+        "name": "LULC",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000000000-0000000000.tif",
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000032768-0000000000.tif"
+        ],
+        "kind": "categorical"
+      },
+      {
+        "name": "Rainfall",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Rainfall.tif"
+        ],
+        "kind": "continuous",
+        "smooth_to_m": 5500
+      },
+      {
+        "name": "Soil",
+        "paths": [
+          "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Soil.tif"
+        ],
+        "kind": "categorical"
+      }
+    ],
+    "dem_factors": [
+      "Elevation",
+      "Slope",
+      "Aspect",
+      "Curvature",
+      "Plan_Curvature",
+      "Profile_Curvature",
+      "TWI",
+      "SPI",
+      "Dist_Drainage"
+    ],
+    "stream_area_km2": 1.0,
+    "target_crs": null,
+    "target_res": null,
+    "absence_ratio": 1.0,
+    "absence_region": "study_area",
+    "absence_min_slope": null,
+    "absence_buffer_m": 100.0,
+    "seed": 42,
+    "test_size": 0.3,
+    "methods": [
+      "XGBoost",
+      "Random Forest",
+      "Logistic Regression",
+      "Frequency Ratio",
+      "Weights of Evidence",
+      "Information Value"
+    ],
+    "params": {},
+    "search_spaces": {},
+    "exclude_factors": [],
+    "vif_screen": null,
+    "tune": true,
+    "tune_search": "random",
+    "tune_iter": 30,
+    "tune_inner_folds": 3,
+    "cv_folds": 5,
+    "cv_repeats": 5,
+    "spatial_block_km": 10.0,
+    "spatial_repeats": 5,
+    "nested_cv": true,
+    "make_maps": true,
+    "classification": "jenks",
+    "n_classes": 5,
+    "n_jobs": -1,
+    "resume": true
+  },
+  "notes": [],
+  "layer_checks": [
+    {
+      "name": "NDVI",
+      "path": "/mnt/user-data/uploads/LSM_Chattogram/LSM_Mapper_v2_run/NDVI_strip00.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        30.0,
+        30.0
+      ],
+      "shape": [
+        1379,
+        4661
+      ],
+      "dtype": "float32",
+      "nodata": NaN,
+      "categorical": false,
+      "overlap_pct": 99.99,
+      "res_ratio": 1.0,
+      "resampling": "bilinear",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [],
+      "errors": []
+    },
+    {
+      "name": "LULC",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/LULC-0000000000-0000000000.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        10.0,
+        10.0
+      ],
+      "shape": [
+        32768,
+        13980
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": true,
+      "overlap_pct": 99.98,
+      "res_ratio": 0.333,
+      "resampling": "mode",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [
+        "Categorical layer stored as floating point; values are rounded to class codes."
+      ],
+      "errors": []
+    },
+    {
+      "name": "Rainfall",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Rainfall.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        30.0,
+        30.0
+      ],
+      "shape": [
+        11031,
+        4661
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": false,
+      "overlap_pct": 100.0,
+      "res_ratio": 1.0,
+      "resampling": "bilinear",
+      "fill_values_found": 0,
+      "effective_res_m": 5100.0,
+      "warnings": [
+        "Stored at 30 m but values change only every ~5100 m (layer was up-sampled before export). Block edges can appear in the susceptibility map."
+      ],
+      "errors": []
+    },
+    {
+      "name": "Soil",
+      "path": "/mnt/user-data/uploads/Downloads/LSM_5Districts_Chattogram/Soil.tif",
+      "crs": "EPSG:32646",
+      "epsg": 32646,
+      "res": [
+        250.0,
+        250.0
+      ],
+      "shape": [
+        1325,
+        560
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "categorical": true,
+      "overlap_pct": 100.0,
+      "res_ratio": 8.333,
+      "resampling": "nearest",
+      "fill_values_found": 0,
+      "effective_res_m": null,
+      "warnings": [
+        "Categorical layer stored as floating point; values are rounded to class codes.",
+        "Native resolution is 8x coarser than the DEM. Block edges can appear in the susceptibility map."
+      ],
+      "errors": []
+    }
+  ],
+  "factor_names": [
+    "Elevation",
+    "Slope",
+    "Aspect",
+    "Curvature",
+    "Plan_Curvature",
+    "Profile_Curvature",
+    "TWI",
+    "SPI",
+    "Dist_Drainage",
+    "NDVI",
+    "LULC",
+    "Rainfall",
+    "Soil"
+  ],
+  "categorical": [
+    "LULC",
+    "Soil"
+  ],
+  "grid": {
+    "crs": "EPSG:32646",
+    "res_m": 30.0,
+    "width": 4661,
+    "height": 11031,
+    "valid_cells": 20876900,
+    "valid_area_km2": 18789.21
+  },
+  "samples": {
+    "inventory": {
+      "records": 730,
+      "outside_grid": 0,
+      "on_nodata": 13,
+      "duplicate_cells": 22,
+      "landslide_cells": 695
+    },
+    "absence": {
+      "eligible_cells": 20858861,
+      "sampled": 695,
+      "region": "study_area",
+      "min_slope_deg": null,
+      "buffer_m": 100.0,
+      "seed": 42
+    },
+    "rows": 1390,
+    "landslide": 695,
+    "non_landslide": 695,
+    "mean_slope_landslide": 13.626947402954102,
+    "mean_slope_non_landslide": 8.95086669921875
+  },
+  "vif": {
+    "Curvature": 436.375,
+    "Profile_Curvature": 170.692,
+    "Plan_Curvature": 128.017,
+    "TWI": 6.501,
+    "SPI": 5.506,
+    "Slope": 5.126,
+    "NDVI": 2.915,
+    "LULC": 2.538,
+    "Elevation": 1.87,
+    "Dist_Drainage": 1.135,
+    "Soil": 1.081,
+    "Rainfall": 1.068,
+    "Aspect": 1.015
+  },
+  "split": {
+    "train": 973,
+    "test": 417
+  },
+  "methods": {
+    "XGBoost": {
+      "tuning": {
+        "best_inner_auc": 0.9036351945202629,
+        "best_params": {
+          "subsample": 0.8,
+          "reg_lambda": 0.5,
+          "n_estimators": 800,
+          "min_child_weight": 1,
+          "max_depth": 5,
+          "learning_rate": 0.01,
+          "colsample_bytree": 0.5
+        }
+      },
+      "default_params": {
+        "n_estimators": 300,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 1,
+        "reg_lambda": 1.0
+      },
+      "test_default": {
+        "AUC": 0.8766332351858668,
+        "Accuracy": 0.8033573141486811,
+        "Sensitivity": 0.8076923076923077,
+        "Specificity": 0.7990430622009569,
+        "Precision": 0.8,
+        "F1": 0.8038277511961722,
+        "Kappa": 0.6067214132910081,
+        "TP": 168,
+        "TN": 167,
+        "FP": 42,
+        "FN": 40
+      },
+      "params": {
+        "n_estimators": 800,
+        "learning_rate": 0.01,
+        "max_depth": 5,
+        "subsample": 0.8,
+        "colsample_bytree": 0.5,
+        "min_child_weight": 1,
+        "reg_lambda": 0.5
+      },
+      "test": {
+        "AUC": 0.8833502024291497,
+        "Accuracy": 0.8009592326139089,
+        "Sensitivity": 0.7836538461538461,
+        "Specificity": 0.8181818181818182,
+        "Precision": 0.8109452736318408,
+        "F1": 0.7970660146699267,
+        "Kappa": 0.6018841229856102,
+        "TP": 163,
+        "TN": 171,
+        "FP": 38,
+        "FN": 45
+      },
+      "train_auc": 0.9989859811899511,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8990072977589151,
+          "sd": 0.016315819154227466
+        },
+        "Accuracy": {
+          "mean": 0.8194244604316546,
+          "sd": 0.017499423884084448
+        },
+        "Sensitivity": {
+          "mean": 0.8287769784172662,
+          "sd": 0.03342292533517111
+        },
+        "Specificity": {
+          "mean": 0.8100719424460431,
+          "sd": 0.03579091500383525
+        },
+        "Precision": {
+          "mean": 0.8147071787773283,
+          "sd": 0.02654647008068955
+        },
+        "F1": {
+          "mean": 0.8209806242882935,
+          "sd": 0.017830989410198256
+        },
+        "Kappa": {
+          "mean": 0.6388489208633094,
+          "sd": 0.034998847768168896
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7845408407832432,
+          "sd": 0.06092403394624517
+        },
+        "Accuracy": {
+          "mean": 0.7049960363739446,
+          "sd": 0.04704549970001867
+        },
+        "Sensitivity": {
+          "mean": 0.5958962366309752,
+          "sd": 0.10231400495119722
+        },
+        "Specificity": {
+          "mean": 0.8142134815212906,
+          "sd": 0.03638985322374277
+        },
+        "Precision": {
+          "mean": 0.7607065283183552,
+          "sd": 0.03834755816259936
+        },
+        "F1": {
+          "mean": 0.6642803127922113,
+          "sd": 0.07786580506839069
+        },
+        "Kappa": {
+          "mean": 0.41009309343134076,
+          "sd": 0.0938157460244786
+        }
+      },
+      "importance": {
+        "Factor": [
+          "NDVI",
+          "Rainfall",
+          "Elevation",
+          "Slope",
+          "TWI",
+          "Dist_Drainage",
+          "Aspect",
+          "LULC",
+          "SPI",
+          "Plan_Curvature",
+          "Soil",
+          "Profile_Curvature",
+          "Curvature"
+        ],
+        "Gain": [
+          0.10499,
+          0.10919,
+          0.14303,
+          0.09558,
+          0.08313,
+          0.07185,
+          0.04996,
+          0.07456,
+          0.0577,
+          0.05383,
+          0.05516,
+          0.05589,
+          0.04513
+        ],
+        "Permutation_mean": [
+          0.09551,
+          0.08172,
+          0.06113,
+          0.03213,
+          0.02203,
+          0.01385,
+          0.00557,
+          0.00276,
+          0.00104,
+          0.00057,
+          -0.00018,
+          -0.00036,
+          -0.00094
+        ],
+        "Permutation_sd": [
+          0.01486,
+          0.00839,
+          0.01327,
+          0.00788,
+          0.00625,
+          0.0053,
+          0.00297,
+          0.00162,
+          0.0029,
+          0.00127,
+          0.00126,
+          0.00223,
+          0.0008
+        ]
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 5.970800362868106,
+        "flat_in_high_vhigh_pct": 5.094500232245788
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.10870093107223511,
+          0.2576311230659485,
+          0.4376980662345886,
+          0.6588957905769348,
+          0.9970521926879883
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 7108617,
+            "pct": 34.05015591395274,
+            "km2": 6397.7553
+          },
+          {
+            "Class": "Low",
+            "cells": 5230880,
+            "pct": 25.05582725404634,
+            "km2": 4707.792
+          },
+          {
+            "Class": "Moderate",
+            "cells": 3895496,
+            "pct": 18.659360345645187,
+            "km2": 3505.9464
+          },
+          {
+            "Class": "High",
+            "cells": 2818233,
+            "pct": 13.499288687496707,
+            "km2": 2536.4097
+          },
+          {
+            "Class": "Very High",
+            "cells": 1823674,
+            "pct": 8.735367798859025,
+            "km2": 1641.3066
+          }
+        ],
+        "landslide_share_pct": [
+          0.7194244604316546,
+          1.2949640287769784,
+          3.4532374100719423,
+          10.359712230215827,
+          84.1726618705036
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 10589290,
+            "pct": 50.72252106395106,
+            "km2": 9530.361
+          },
+          {
+            "Class": "Low",
+            "cells": 4974624,
+            "pct": 23.82836532243772,
+            "km2": 4477.1616
+          },
+          {
+            "Class": "Moderate",
+            "cells": 2874012,
+            "pct": 13.76646915969325,
+            "km2": 2586.6108
+          },
+          {
+            "Class": "High",
+            "cells": 1697564,
+            "pct": 8.131303019126403,
+            "km2": 1527.8076
+          },
+          {
+            "Class": "Very High",
+            "cells": 741410,
+            "pct": 3.551341434791564,
+            "km2": 667.269
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          }
+        ]
+      }
+    },
+    "Random Forest": {
+      "tuning": {
+        "best_inner_auc": 0.8751461430545309,
+        "best_params": {
+          "n_estimators": 800,
+          "min_samples_leaf": 2,
+          "max_features": 0.5,
+          "max_depth": 24
+        }
+      },
+      "default_params": {
+        "n_estimators": 500,
+        "max_depth": null,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "class_weight": "balanced"
+      },
+      "test_default": {
+        "AUC": 0.8650280640412219,
+        "Accuracy": 0.7913669064748201,
+        "Sensitivity": 0.7740384615384616,
+        "Specificity": 0.8086124401913876,
+        "Precision": 0.8009950248756219,
+        "F1": 0.7872860635696821,
+        "Kappa": 0.5826978156596156,
+        "TP": 161,
+        "TN": 169,
+        "FP": 40,
+        "FN": 47
+      },
+      "params": {
+        "n_estimators": 800,
+        "max_depth": 24,
+        "min_samples_leaf": 2,
+        "max_features": 0.5,
+        "class_weight": "balanced"
+      },
+      "test": {
+        "AUC": 0.8637743835112256,
+        "Accuracy": 0.7937649880095923,
+        "Sensitivity": 0.7548076923076923,
+        "Specificity": 0.8325358851674641,
+        "Precision": 0.8177083333333334,
+        "F1": 0.785,
+        "Kappa": 0.587451684152402,
+        "TP": 157,
+        "TN": 174,
+        "FP": 35,
+        "FN": 51
+      },
+      "train_auc": 0.9999873247648744,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8749619584907613,
+          "sd": 0.020316552225973415
+        },
+        "Accuracy": {
+          "mean": 0.7936690647482015,
+          "sd": 0.020894296016485767
+        },
+        "Sensitivity": {
+          "mean": 0.7936690647482014,
+          "sd": 0.03366209524290953
+        },
+        "Specificity": {
+          "mean": 0.7936690647482014,
+          "sd": 0.03971631369545195
+        },
+        "Precision": {
+          "mean": 0.7949533084544366,
+          "sd": 0.03026540346453166
+        },
+        "F1": {
+          "mean": 0.793593956840169,
+          "sd": 0.020724211841429547
+        },
+        "Kappa": {
+          "mean": 0.5873381294964028,
+          "sd": 0.04178859203297153
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7987869130819835,
+          "sd": 0.042083334011788015
+        },
+        "Accuracy": {
+          "mean": 0.720209981944331,
+          "sd": 0.0372757196754869
+        },
+        "Sensitivity": {
+          "mean": 0.6389214524218674,
+          "sd": 0.09725002251487616
+        },
+        "Specificity": {
+          "mean": 0.8016455582838679,
+          "sd": 0.04306838579824636
+        },
+        "Precision": {
+          "mean": 0.7639136790340281,
+          "sd": 0.027964564577977163
+        },
+        "F1": {
+          "mean": 0.6917704781387399,
+          "sd": 0.060242927739674976
+        },
+        "Kappa": {
+          "mean": 0.4405115911552122,
+          "sd": 0.07442472152804835
+        }
+      },
+      "importance": {
+        "Factor": [
+          "NDVI",
+          "Elevation",
+          "Slope",
+          "Rainfall",
+          "TWI",
+          "Dist_Drainage",
+          "Aspect",
+          "Profile_Curvature",
+          "SPI",
+          "Plan_Curvature",
+          "Curvature",
+          "LULC",
+          "Soil"
+        ],
+        "Impurity": [
+          0.15787,
+          0.18359,
+          0.11401,
+          0.12369,
+          0.09478,
+          0.08193,
+          0.05154,
+          0.04951,
+          0.0506,
+          0.04304,
+          0.02783,
+          0.0074,
+          0.0142
+        ],
+        "Permutation_mean": [
+          0.11191,
+          0.08063,
+          0.04039,
+          0.03636,
+          0.02621,
+          0.01861,
+          0.00698,
+          0.00141,
+          0.00114,
+          0.00075,
+          0.00062,
+          0.00058,
+          0.00028
+        ],
+        "Permutation_sd": [
+          0.01615,
+          0.01395,
+          0.00894,
+          0.00397,
+          0.0071,
+          0.00612,
+          0.00294,
+          0.00197,
+          0.00184,
+          0.00155,
+          0.00097,
+          0.00112,
+          0.00124
+        ]
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.9354652685825355,
+        "flat_in_high_vhigh_pct": 7.129311550694192
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.12693749368190765,
+          0.2814464271068573,
+          0.4372738003730774,
+          0.6282649040222168,
+          0.9983333349227905
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 4681477,
+            "pct": 22.424196121071613,
+            "km2": 4213.3293
+          },
+          {
+            "Class": "Low",
+            "cells": 5450025,
+            "pct": 26.1055281195963,
+            "km2": 4905.0225
+          },
+          {
+            "Class": "Moderate",
+            "cells": 5152983,
+            "pct": 24.682701933716213,
+            "km2": 4637.6847
+          },
+          {
+            "Class": "High",
+            "cells": 3715830,
+            "pct": 17.798763226341077,
+            "km2": 3344.247
+          },
+          {
+            "Class": "Very High",
+            "cells": 1876585,
+            "pct": 8.988810599274796,
+            "km2": 1688.9265
+          }
+        ],
+        "landslide_share_pct": [
+          0.28776978417266186,
+          2.158273381294964,
+          2.8776978417266186,
+          8.201438848920864,
+          86.4748201438849
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 7021399,
+            "pct": 33.63238316033511,
+            "km2": 6319.2591
+          },
+          {
+            "Class": "Low",
+            "cells": 7193226,
+            "pct": 34.45543160143508,
+            "km2": 6473.9034
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4385360,
+            "pct": 21.00580066963965,
+            "km2": 3946.824
+          },
+          {
+            "Class": "High",
+            "cells": 1842965,
+            "pct": 8.82777136452251,
+            "km2": 1658.6685
+          },
+          {
+            "Class": "Very High",
+            "cells": 433950,
+            "pct": 2.0786132040676537,
+            "km2": 390.555
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175382,
+            "pct": 20.000009579966374,
+            "km2": 3757.8438
+          },
+          {
+            "Class": "Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175386,
+            "pct": 20.000028739899122,
+            "km2": 3757.8474
+          },
+          {
+            "Class": "High",
+            "cells": 4175377,
+            "pct": 19.99998563005044,
+            "km2": 3757.8393
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175375,
+            "pct": 19.999976050084065,
+            "km2": 3757.8375
+          }
+        ]
+      }
+    },
+    "Logistic Regression": {
+      "tuning": {
+        "best_inner_auc": 0.8133709167607188,
+        "best_params": {
+          "C": 100.0
+        }
+      },
+      "default_params": {
+        "C": 1.0,
+        "class_weight": "balanced"
+      },
+      "test_default": {
+        "AUC": 0.7817675745307325,
+        "Accuracy": 0.697841726618705,
+        "Sensitivity": 0.7307692307692307,
+        "Specificity": 0.6650717703349283,
+        "Precision": 0.6846846846846847,
+        "F1": 0.7069767441860465,
+        "Kappa": 0.39577727178637967,
+        "TP": 152,
+        "TN": 139,
+        "FP": 70,
+        "FN": 56
+      },
+      "params": {
+        "C": 100.0,
+        "class_weight": "balanced"
+      },
+      "test": {
+        "AUC": 0.7897267206477734,
+        "Accuracy": 0.7050359712230215,
+        "Sensitivity": 0.7451923076923077,
+        "Specificity": 0.6650717703349283,
+        "Precision": 0.6888888888888889,
+        "F1": 0.7159353348729792,
+        "Kappa": 0.41018387553041025,
+        "TP": 155,
+        "TN": 139,
+        "FP": 70,
+        "FN": 53
+      },
+      "train_auc": 0.8286941972773596,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8091154702137573,
+          "sd": 0.026000493150136292
+        },
+        "Accuracy": {
+          "mean": 0.7227338129496402,
+          "sd": 0.029914565304016982
+        },
+        "Sensitivity": {
+          "mean": 0.7424460431654677,
+          "sd": 0.037726936984537836
+        },
+        "Specificity": {
+          "mean": 0.7030215827338131,
+          "sd": 0.042486669173202894
+        },
+        "Precision": {
+          "mean": 0.7149681528276287,
+          "sd": 0.03153551262477468
+        },
+        "F1": {
+          "mean": 0.7279944098493207,
+          "sd": 0.02943790638352062
+        },
+        "Kappa": {
+          "mean": 0.4454676258992805,
+          "sd": 0.05982913060803392
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7818248045685575,
+          "sd": 0.03201256882610927
+        },
+        "Accuracy": {
+          "mean": 0.6953894042894889,
+          "sd": 0.03243152963916776
+        },
+        "Sensitivity": {
+          "mean": 0.6843606097058047,
+          "sd": 0.07584253259475972
+        },
+        "Specificity": {
+          "mean": 0.7065002584507561,
+          "sd": 0.0477318941631488
+        },
+        "Precision": {
+          "mean": 0.7005042455389615,
+          "sd": 0.030618230724031227
+        },
+        "F1": {
+          "mean": 0.690191684434884,
+          "sd": 0.04473002601621046
+        },
+        "Kappa": {
+          "mean": 0.39082939738984657,
+          "sd": 0.06480613736780108
+        }
+      },
+      "importance": {
+        "Factor": [
+          "TWI",
+          "NDVI",
+          "SPI",
+          "LULC",
+          "Elevation",
+          "Dist_Drainage",
+          "Curvature",
+          "Profile_Curvature",
+          "Soil",
+          "Rainfall",
+          "Slope",
+          "Aspect",
+          "Plan_Curvature"
+        ],
+        "Permutation_mean": [
+          0.15292,
+          0.09395,
+          0.07618,
+          0.0726,
+          0.044,
+          0.02338,
+          0.00833,
+          0.00597,
+          0.00544,
+          0.00279,
+          0.00218,
+          0.00046,
+          0.00017
+        ],
+        "Permutation_sd": [
+          0.01776,
+          0.01653,
+          0.01484,
+          0.01248,
+          0.009,
+          0.01106,
+          0.00282,
+          0.00351,
+          0.00329,
+          0.00101,
+          0.0019,
+          0.00077,
+          0.00262
+        ]
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.04568015156265,
+        "flat_in_high_vhigh_pct": 7.529138253243308
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.11714763939380646,
+          0.28943246603012085,
+          0.4650104343891144,
+          0.6597701907157898,
+          0.9999514818191528
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 4758552,
+            "pct": 22.793384075221898,
+            "km2": 4282.6968
+          },
+          {
+            "Class": "Low",
+            "cells": 4559426,
+            "pct": 21.83957388309567,
+            "km2": 4103.4834
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4783638,
+            "pct": 22.913545593454966,
+            "km2": 4305.2742
+          },
+          {
+            "Class": "High",
+            "cells": 4285827,
+            "pct": 20.52903927307215,
+            "km2": 3857.2443
+          },
+          {
+            "Class": "Very High",
+            "cells": 2489457,
+            "pct": 11.924457175155315,
+            "km2": 2240.5113
+          }
+        ],
+        "landslide_share_pct": [
+          0.7194244604316546,
+          7.625899280575539,
+          14.388489208633093,
+          22.73381294964029,
+          54.53237410071942
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 6866157,
+            "pct": 32.888776590394166,
+            "km2": 6179.5413
+          },
+          {
+            "Class": "Low",
+            "cells": 5506661,
+            "pct": 26.37681360738424,
+            "km2": 4955.9949
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4890110,
+            "pct": 23.423544683358163,
+            "km2": 4401.099
+          },
+          {
+            "Class": "High",
+            "cells": 2891770,
+            "pct": 13.851529681130819,
+            "km2": 2602.593
+          },
+          {
+            "Class": "Very High",
+            "cells": 722202,
+            "pct": 3.4593354377326135,
+            "km2": 649.9818
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Low",
+            "cells": 4175382,
+            "pct": 20.000009579966374,
+            "km2": 3757.8438
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175378,
+            "pct": 19.999990420033626,
+            "km2": 3757.8402
+          },
+          {
+            "Class": "High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          }
+        ]
+      }
+    },
+    "Frequency Ratio": {
+      "tuning": {
+        "best_inner_auc": 0.8329470730713714,
+        "best_params": {
+          "n_bins": 10
+        }
+      },
+      "default_params": {
+        "n_bins": 10
+      },
+      "test_default": {
+        "AUC": 0.8242546926757454
+      },
+      "params": {
+        "n_bins": 10
+      },
+      "test": {
+        "AUC": 0.8242546926757454
+      },
+      "train_auc": 0.8575937333637539,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.829634076911133,
+          "sd": 0.027409306631020647
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7643327531692381,
+          "sd": 0.03850611831862939
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 6.13920033080754,
+        "flat_in_high_vhigh_pct": 9.333082369410684
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.24606753885746002,
+          0.40986019372940063,
+          0.5586788654327393,
+          0.7061480283737183,
+          1.0
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 3319245,
+            "pct": 15.899127744061618,
+            "km2": 2987.3205
+          },
+          {
+            "Class": "Low",
+            "cells": 4138102,
+            "pct": 19.821439006749085,
+            "km2": 3724.2918
+          },
+          {
+            "Class": "Moderate",
+            "cells": 5148883,
+            "pct": 24.66306300264886,
+            "km2": 4633.9947
+          },
+          {
+            "Class": "High",
+            "cells": 5072939,
+            "pct": 24.299292519483256,
+            "km2": 4565.6451
+          },
+          {
+            "Class": "Very High",
+            "cells": 3197731,
+            "pct": 15.317077727057178,
+            "km2": 2877.9579
+          }
+        ],
+        "landslide_share_pct": [
+          0.28776978417266186,
+          2.7338129496402876,
+          8.201438848920864,
+          21.294964028776977,
+          67.4820143884892
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 2708963,
+            "pct": 12.97588722463584,
+            "km2": 2438.0667
+          },
+          {
+            "Class": "Low",
+            "cells": 4840742,
+            "pct": 23.187072793374494,
+            "km2": 4356.6678
+          },
+          {
+            "Class": "Moderate",
+            "cells": 6922598,
+            "pct": 33.15912803146061,
+            "km2": 6230.3382
+          },
+          {
+            "Class": "High",
+            "cells": 5399358,
+            "pct": 25.862834041452516,
+            "km2": 4859.4222
+          },
+          {
+            "Class": "Very High",
+            "cells": 1005239,
+            "pct": 4.815077909076539,
+            "km2": 904.7151
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175384,
+            "pct": 20.000019159932748,
+            "km2": 3757.8456
+          },
+          {
+            "Class": "High",
+            "cells": 4175377,
+            "pct": 19.99998563005044,
+            "km2": 3757.8393
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175379,
+            "pct": 19.999995210016813,
+            "km2": 3757.8411
+          }
+        ]
+      }
+    },
+    "Weights of Evidence": {
+      "tuning": {
+        "best_inner_auc": 0.8267902076127479,
+        "best_params": {
+          "n_bins": 15
+        }
+      },
+      "default_params": {
+        "n_bins": 10
+      },
+      "test_default": {
+        "AUC": 0.8163645564961355
+      },
+      "params": {
+        "n_bins": 15
+      },
+      "test": {
+        "AUC": 0.8293614280456385
+      },
+      "train_auc": 0.861180824904302,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8236778634646239,
+          "sd": 0.02659165220907742
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7599491567109214,
+          "sd": 0.028896950491241497
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 4.106638044198379,
+        "flat_in_high_vhigh_pct": 7.906135571617819
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.19337774813175201,
+          0.3626015782356262,
+          0.49956175684928894,
+          0.6135054230690002,
+          0.8931659460067749
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 3012277,
+            "pct": 14.42875618506579,
+            "km2": 2711.0493
+          },
+          {
+            "Class": "Low",
+            "cells": 2621011,
+            "pct": 12.554598623358832,
+            "km2": 2358.9099
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4769789,
+            "pct": 22.847209116296003,
+            "km2": 4292.8101
+          },
+          {
+            "Class": "High",
+            "cells": 6256591,
+            "pct": 29.968965698930397,
+            "km2": 5630.9319
+          },
+          {
+            "Class": "Very High",
+            "cells": 4217232,
+            "pct": 20.200470376348978,
+            "km2": 3795.5088
+          }
+        ],
+        "landslide_share_pct": [
+          0.0,
+          0.7194244604316546,
+          5.323741007194244,
+          20.287769784172664,
+          73.66906474820144
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 2908478,
+            "pct": 13.931560720221873,
+            "km2": 2617.6302
+          },
+          {
+            "Class": "Low",
+            "cells": 2729671,
+            "pct": 13.07507819647553,
+            "km2": 2456.7039
+          },
+          {
+            "Class": "Moderate",
+            "cells": 6911807,
+            "pct": 33.10743932288798,
+            "km2": 6220.6263
+          },
+          {
+            "Class": "High",
+            "cells": 7667640,
+            "pct": 36.727866685187934,
+            "km2": 6900.876
+          },
+          {
+            "Class": "Very High",
+            "cells": 659304,
+            "pct": 3.158055075226686,
+            "km2": 593.3736
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Low",
+            "cells": 4175381,
+            "pct": 20.000004789983187,
+            "km2": 3757.8429
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "High",
+            "cells": 4175381,
+            "pct": 20.000004789983187,
+            "km2": 3757.8429
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175378,
+            "pct": 19.999990420033626,
+            "km2": 3757.8402
+          }
+        ]
+      }
+    },
+    "Information Value": {
+      "tuning": {
+        "best_inner_auc": 0.826750311454966,
+        "best_params": {
+          "n_bins": 15
+        }
+      },
+      "default_params": {
+        "n_bins": 10
+      },
+      "test_default": {
+        "AUC": 0.8202291129922707
+      },
+      "params": {
+        "n_bins": 15
+      },
+      "test": {
+        "AUC": 0.8346521899153477
+      },
+      "train_auc": 0.8620216155009676,
+      "cv_kfold": {
+        "AUC": {
+          "mean": 0.8261663474975416,
+          "sd": 0.02684424786895621
+        }
+      },
+      "cv_spatial": {
+        "AUC": {
+          "mean": 0.7622876861524743,
+          "sd": 0.029985801000004614
+        }
+      },
+      "flat_terrain_check": {
+        "flat_deg": 3.0,
+        "high_vhigh_on_flat_pct": 3.926127621373623,
+        "flat_in_high_vhigh_pct": 7.646593780518447
+      },
+      "map": {
+        "classification": "jenks",
+        "upper_breaks": [
+          0.19095052778720856,
+          0.3589593768119812,
+          0.4970227777957916,
+          0.6110361814498901,
+          0.9101092219352722
+        ],
+        "classes": [
+          {
+            "Class": "Very Low",
+            "cells": 2988722,
+            "pct": 14.31592813109226,
+            "km2": 2689.8498
+          },
+          {
+            "Class": "Low",
+            "cells": 2611685,
+            "pct": 12.509927240155386,
+            "km2": 2350.5165
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4680760,
+            "pct": 22.420761703126423,
+            "km2": 4212.684
+          },
+          {
+            "Class": "High",
+            "cells": 6238795,
+            "pct": 29.883723158131716,
+            "km2": 5614.9155
+          },
+          {
+            "Class": "Very High",
+            "cells": 4356938,
+            "pct": 20.869659767494216,
+            "km2": 3921.2442
+          }
+        ],
+        "landslide_share_pct": [
+          0.0,
+          0.8633093525179856,
+          5.323741007194244,
+          18.848920863309353,
+          74.96402877697842
+        ],
+        "classes_equal": [
+          {
+            "Class": "Very Low",
+            "cells": 2964529,
+            "pct": 14.200044067845322,
+            "km2": 2668.0761
+          },
+          {
+            "Class": "Low",
+            "cells": 2862435,
+            "pct": 13.71101552433551,
+            "km2": 2576.1915
+          },
+          {
+            "Class": "Moderate",
+            "cells": 7268708,
+            "pct": 34.81698911236822,
+            "km2": 6541.8372
+          },
+          {
+            "Class": "High",
+            "cells": 7357100,
+            "pct": 35.240385306247575,
+            "km2": 6621.39
+          },
+          {
+            "Class": "Very High",
+            "cells": 424128,
+            "pct": 2.031565989203378,
+            "km2": 381.7152
+          }
+        ],
+        "classes_quantile": [
+          {
+            "Class": "Very Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Low",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Moderate",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          },
+          {
+            "Class": "Very High",
+            "cells": 4175380,
+            "pct": 20.0,
+            "km2": 3757.842
+          }
+        ]
+      }
+    }
+  },
+  "finished": "2026-10-31 23:57:57",
+  "runtime_s": 3335.8
+}

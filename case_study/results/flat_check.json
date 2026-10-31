@@ -1,0 +1,62 @@
+{
+ "whole_area|XGBoost": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 5.970800362868106,
+  "flat_in_high_vhigh_pct": 5.094500232245788
+ },
+ "whole_area|Random Forest": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 6.9354652685825355,
+  "flat_in_high_vhigh_pct": 7.129311550694192
+ },
+ "whole_area|Logistic Regression": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 6.04568015156265,
+  "flat_in_high_vhigh_pct": 7.529138253243308
+ },
+ "whole_area|Frequency Ratio": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 6.13920033080754,
+  "flat_in_high_vhigh_pct": 9.333082369410684
+ },
+ "whole_area|Weights of Evidence": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 4.106638044198379,
+  "flat_in_high_vhigh_pct": 7.906135571617819
+ },
+ "whole_area|Information Value": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 3.926127621373623,
+  "flat_in_high_vhigh_pct": 7.646593780518447
+ },
+ "slope_gt3_bbox|XGBoost": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 64.40933375079992,
+  "flat_in_high_vhigh_pct": 68.10078823871301
+ },
+ "slope_gt3_bbox|Random Forest": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 54.42428997375242,
+  "flat_in_high_vhigh_pct": 58.75540888217446
+ },
+ "slope_gt3_bbox|Logistic Regression": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 33.14519040609931,
+  "flat_in_high_vhigh_pct": 33.34494409098521
+ },
+ "slope_gt3_bbox|Frequency Ratio": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 6.13920033080754,
+  "flat_in_high_vhigh_pct": 9.333082369410684
+ },
+ "slope_gt3_bbox|Weights of Evidence": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 4.106638044198379,
+  "flat_in_high_vhigh_pct": 7.906135571617819
+ },
+ "slope_gt3_bbox|Information Value": {
+  "flat_deg": 3.0,
+  "high_vhigh_on_flat_pct": 3.926127621373623,
+  "flat_in_high_vhigh_pct": 7.646593780518447
+ }
+}
