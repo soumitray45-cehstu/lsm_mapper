@@ -19,7 +19,8 @@ programming to use it.
   Weights of Evidence and Information Value.
 * **Editable hyper-parameters**, plus random or grid **tuning** with inner
   cross-validation.
-* **Validation** by hold-out, repeated stratified *k*-fold CV and **spatial block CV**.
+* **Validation** by hold-out, repeated stratified *k*-fold CV and **spatial block CV**; tuning with random or spatial inner folds.
+* **Reliability diagnostics for every map**: area of applicability (dissimilarity index and mask, Meyer & Pebesma 2021), uncertainty map from the spatial-CV ensemble, AUC inside/outside the area of applicability and by dissimilarity, block-edge artefact index for coarse input layers, and a flat-terrain sampling check (`maps/AOA_DI_*.tif`, `maps/AOA_mask_*.tif`, `maps/Uncertainty_SD_*.tif`, `tables/auc_by_di_*.csv`, `figures/reliability.png`, and the `reliability` section of `run_report.json`).
   Nested tuning is available, so CV scores never see the tuning data.
 * **Importance:** impurity (RF), gain (XGBoost) and permutation importance on the test set.
 * **Multicollinearity:** VIF and Pearson correlation, with optional VIF-based factor screening.
