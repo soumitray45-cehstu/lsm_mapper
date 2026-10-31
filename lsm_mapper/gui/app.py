@@ -336,13 +336,18 @@ class SettingsTab(QWidget):
         g = QGroupBox("Non-landslide sampling")
         f = QFormLayout(g)
         self.ratio = QDoubleSpinBox(); self.ratio.setRange(0.5, 10); self.ratio.setValue(1.0); self.ratio.setSuffix(" x landslides")
-        self.region = QComboBox(); self.region.addItems(["inventory_bbox", "study_area"])
-        self.minslope = QDoubleSpinBox(); self.minslope.setRange(-1, 60); self.minslope.setValue(3); self.minslope.setSuffix(" deg")
+        self.region = QComboBox(); self.region.addItems(["study_area", "inventory_bbox"])
+        self.minslope = QDoubleSpinBox(); self.minslope.setRange(-1, 60); self.minslope.setValue(-1); self.minslope.setSuffix(" deg")
         self.minslope.setSpecialValueText("no limit")
         self.buffer = QDoubleSpinBox(); self.buffer.setRange(0, 5000); self.buffer.setValue(100); self.buffer.setSuffix(" m")
         f.addRow("Number", self.ratio)
         f.addRow("Region", self.region)
         f.addRow("Minimum slope", self.minslope)
+        warn = QLabel("Restricting non-landslide cells (to steep slopes or a sub-region) means the "
+                      "models never see the excluded terrain, and they can extrapolate badly onto it.")
+        warn.setWordWrap(True)
+        warn.setStyleSheet("color:#c9a227")
+        f.addRow(warn)
         f.addRow("Distance from any landslide", self.buffer)
         v.addWidget(g)
 
@@ -507,10 +512,11 @@ class ResultsTab(QWidget):
         with open(os.path.join(out, "run_report.json")) as f:
             rep = json.load(f)
         ms = list(rep.get("methods", {}))
-        cols = ["Test AUC", "Accuracy", "Kappa", "k-fold AUC (mean ± SD)",
-                "Spatial CV AUC (mean ± SD)", "Train AUC"]
+        cols = ["Test AUC", "Accuracy", "Kappa", "k-fold CV AUC", "Spatial CV AUC", "Train AUC"]
         self.table.setColumnCount(len(cols))
         self.table.setHorizontalHeaderLabels(cols)
+        self.table.horizontalHeaderItem(3).setToolTip("Mean and SD over the outer folds of repeated k-fold CV")
+        self.table.horizontalHeaderItem(4).setToolTip("Mean and SD over the outer folds of spatial block CV")
         self.table.setRowCount(len(ms))
         self.table.setVerticalHeaderLabels(ms)
         for r, m in enumerate(ms):

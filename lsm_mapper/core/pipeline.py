@@ -48,8 +48,8 @@ class RunConfig:
     target_res: float | None = None
     # sampling
     absence_ratio: float = 1.0
-    absence_region: str = "inventory_bbox"
-    absence_min_slope: float | None = 3.0
+    absence_region: str = "study_area"
+    absence_min_slope: float | None = None
     absence_buffer_m: float = 100.0
     seed: int = 42
     test_size: float = 0.3
@@ -74,6 +74,7 @@ class RunConfig:
     classification: str = "jenks"
     n_classes: int = 5
     n_jobs: int = -1
+    resume: bool = True                 # reuse finished steps in output_dir
 
     @staticmethod
     def load(path):
@@ -100,10 +101,37 @@ class Run:
                        "packages": _package_versions(),
                        "started": time.strftime("%Y-%m-%d %H:%M:%S"),
                        "config": asdict(cfg), "notes": []}
+        rp = os.path.join(self.out, "run_report.json")
+        self.prev = {}
+        if cfg.resume and os.path.exists(rp):
+            with open(rp) as f:
+                self.prev = json.load(f)
+            if self.prev.get("config", {}) != asdict(cfg):
+                self.prev = {}          # settings changed: start again
 
     # ------------------------------------------------------------------ factors
+    def _resume_factors(self):
+        cfg = self.cfg
+        if "grid" not in self.prev:
+            return False
+        fdir = os.path.join(self.out, "factors")
+        names = [k for k in self.prev.get("factor_names", [])]
+        if not names or not all(os.path.exists(os.path.join(fdir, f"{k}.tif")) for k in names):
+            return False
+        self.grid, notes = raster.reference_grid(cfg.dem, cfg.target_crs, cfg.target_res)
+        self.factors = {k: os.path.join(fdir, f"{k}.tif") for k in names}
+        self.categorical = list(self.prev.get("categorical", []))
+        self.valid = raster.read_band(os.path.join(self.out, "_work", "valid_mask.tif")) > 0
+        self.slope = raster.read_band(os.path.join(fdir, "Slope.tif"))
+        for k in ("notes", "layer_checks", "grid", "factor_names", "categorical"):
+            self.report[k] = self.prev[k]
+        self.log("Resumed: factors already prepared.")
+        return True
+
     def prepare_factors(self):
         cfg = self.cfg
+        if self._resume_factors():
+            return
         self.grid, notes = raster.reference_grid(cfg.dem, cfg.target_crs, cfg.target_res)
         self.report["notes"] += notes
         g = self.grid
@@ -176,6 +204,8 @@ class Run:
         raster.write_array(valid.astype("uint8"), g, os.path.join(self.out, "_work", "valid_mask.tif"),
                            dtype="uint8", nodata=0)
         n = int(valid.sum())
+        self.report["factor_names"] = list(self.factors)
+        self.report["categorical"] = list(self.categorical)
         self.report["grid"] = {"crs": g.crs.to_string(), "res_m": g.res, "width": g.width,
                                "height": g.height, "valid_cells": n,
                                "valid_area_km2": n * g.res ** 2 / 1e6}
@@ -239,8 +269,20 @@ class Run:
         self.fitted = {}
         roc = {}
         cats = [c for c in self.categorical if c in self.names]
+        prev_m = self.prev.get("methods", {}) if self.prev.get("split") == self.report["split"] else {}
         for mi, m in enumerate(cfg.methods):
             self.log(f"--- {m} ---")
+            mf = os.path.join(self.out, "models", f"{_slug(m)}.joblib")
+            if m in prev_m and "cv_kfold" in prev_m[m] and os.path.exists(mf):
+                pipe = joblib.load(mf)["pipeline"]
+                p = pipe.predict_proba(X[te])[:, 1]
+                from sklearn.metrics import roc_curve
+                fpr, tpr, _ = roc_curve(y[te], p)
+                roc[m] = (fpr, tpr, prev_m[m]["test"]["AUC"])
+                self.fitted[m] = pipe
+                self.report["methods"][m] = prev_m[m]
+                self.log("Resumed: already fitted and validated.")
+                continue
             mk = lambda m=m: make_model(m, self.names, cats, cfg.params.get(m),
                                         area_sample=self.area, seed=cfg.seed, n_jobs=cfg.n_jobs)
             entry = {}
@@ -314,8 +356,11 @@ class Run:
         srcs = {k: rasterio.open(self.factors[k]) for k in self.names}
         try:
             for m, pipe in self.fitted.items():
-                self.log(f"Predicting {m} map...")
                 out_p = os.path.join(self.out, "maps", f"LSM_{_slug(m)}_probability.tif")
+                if "map" in self.report["methods"][m] and os.path.exists(out_p):
+                    self.log(f"Resumed: {m} map exists.")
+                    continue
+                self.log(f"Predicting {m} map...")
                 prob = np.full(g.shape, np.nan, np.float32)
                 for r0 in range(0, g.height, block_rows):
                     h = min(block_rows, g.height - r0)
@@ -335,6 +380,8 @@ class Run:
                                    os.path.join(self.out, "maps", f"LSM_{_slug(m)}_classes.tif"),
                                    dtype="uint8", nodata=0)
                 e = self.report["methods"][m]
+                if "Slope" in self.factors:
+                    e["flat_terrain_check"] = classify.flat_terrain_check(cls, raster.read_band(self.factors["Slope"]))
                 e["map"] = {"classification": cfg.classification, "upper_breaks": ub.tolist(),
                             "classes": classify.class_table(cls, g.res ** 2, cfg.n_classes),
                             "landslide_share_pct": classify.landslide_density(cls, self.ls_rc, cfg.n_classes)}
@@ -359,6 +406,7 @@ class Run:
         for label, fn in steps:
             self.log(f"== {label} ==")
             fn()
+            self._save_report()
         from . import figures
         figures.all_figures(self)
         self.report["finished"] = time.strftime("%Y-%m-%d %H:%M:%S")

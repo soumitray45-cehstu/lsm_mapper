@@ -1,0 +1,65 @@
+{
+ "dem": "data/DEM.tif",
+ "inventory": "data/Landslide_Inventory_UTM46N.shp",
+ "roi": null,
+ "output_dir": "chattogram_run",
+ "factors": [
+  {
+   "name": "NDVI",
+   "paths": [
+    "data/NDVI_tiles_30m/NDVI_strip00.tif",
+    "data/NDVI_tiles_30m/NDVI_strip01.tif",
+    "data/NDVI_tiles_30m/NDVI_strip02.tif",
+    "data/NDVI_tiles_30m/NDVI_strip03.tif",
+    "data/NDVI_tiles_30m/NDVI_strip04.tif",
+    "data/NDVI_tiles_30m/NDVI_strip05.tif",
+    "data/NDVI_tiles_30m/NDVI_strip06.tif",
+    "data/NDVI_tiles_30m/NDVI_strip07.tif"
+   ],
+   "kind": "continuous",
+   "resampling": "nearest"
+  },
+  {
+   "name": "LULC",
+   "paths": [
+    "data/LULC-0000000000-0000000000.tif",
+    "data/LULC-0000032768-0000000000.tif"
+   ],
+   "kind": "categorical"
+  },
+  {
+   "name": "Rainfall",
+   "paths": [
+    "data/Rainfall.tif"
+   ],
+   "kind": "continuous",
+   "smooth_to_m": 5500
+  },
+  {
+   "name": "Soil",
+   "paths": [
+    "data/Soil.tif"
+   ],
+   "kind": "categorical"
+  }
+ ],
+ "methods": [
+  "XGBoost",
+  "Random Forest",
+  "Logistic Regression",
+  "Frequency Ratio",
+  "Weights of Evidence",
+  "Information Value"
+ ],
+ "tune": true,
+ "cv_repeats": 5,
+ "spatial_repeats": 5,
+ "make_maps": true,
+ "tune_iter": 30,
+ "tune_inner_folds": 3,
+ "cv_folds": 5,
+ "spatial_block_km": 10.0,
+ "nested_cv": true,
+ "absence_region": "study_area",
+ "absence_min_slope": null
+}

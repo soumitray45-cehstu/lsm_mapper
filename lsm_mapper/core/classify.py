@@ -47,3 +47,14 @@ def landslide_density(cls: np.ndarray, ls_rc: np.ndarray, k=5):
     c = c[np.isfinite(c)].astype(int)
     n = np.bincount(c, minlength=k + 1)[1:]
     return (100 * n / max(n.sum(), 1)).tolist()
+
+
+def flat_terrain_check(cls: np.ndarray, slope: np.ndarray, flat_deg=3.0):
+    """Share of High + Very High cells lying on near-flat terrain, a quick check
+    for extrapolation onto terrain the model never saw as non-landslide."""
+    v = np.isfinite(cls) & np.isfinite(slope)
+    flat = v & (slope < flat_deg)
+    hv = v & (cls >= 4)
+    return {"flat_deg": flat_deg,
+            "high_vhigh_on_flat_pct": float(100 * (hv & flat).sum() / max(hv.sum(), 1)),
+            "flat_in_high_vhigh_pct": float(100 * (hv & flat).sum() / max(flat.sum(), 1))}

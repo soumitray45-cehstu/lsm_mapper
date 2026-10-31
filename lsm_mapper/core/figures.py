@@ -183,6 +183,8 @@ def interactive_map(run, path, max_px=2000):
     for i, (m, url, bounds) in enumerate(layers):
         folium.raster_layers.ImageOverlay(url, bounds=bounds, name=m, show=(i == 0)).add_to(fm)
     folium.LayerControl(collapsed=False).add_to(fm)
+    b0 = layers[0][2]
+    fm.fit_bounds(b0)
     legend = "".join(f'<div><span style="background:{c};width:14px;height:14px;display:inline-block;'
                      f'margin-right:6px"></span>{n}</div>' for c, n in
                      zip(CLASS_COLORS, ["Very Low", "Low", "Moderate", "High", "Very High"]))

@@ -1,0 +1,50 @@
+{
+ "dem": "sample_data/DEM.tif",
+ "inventory": "sample_data/Landslide_inventory.shp",
+ "output_dir": "sample_run_output",
+ "factors": [
+  {
+   "name": "NDVI",
+   "paths": [
+    "sample_data/NDVI_Sentinel2.tif"
+   ],
+   "kind": "continuous"
+  },
+  {
+   "name": "LULC",
+   "paths": [
+    "sample_data/LULC_WorldCover.tif"
+   ],
+   "kind": "categorical"
+  },
+  {
+   "name": "Rainfall",
+   "paths": [
+    "sample_data/Rainfall_CHIRPS.tif"
+   ],
+   "kind": "continuous",
+   "smooth_to_m": 5500
+  },
+  {
+   "name": "Soil",
+   "paths": [
+    "sample_data/Soil_OpenLandMap.tif"
+   ],
+   "kind": "categorical"
+  }
+ ],
+ "methods": [
+  "XGBoost",
+  "Random Forest",
+  "Logistic Regression",
+  "Frequency Ratio"
+ ],
+ "tune": true,
+ "tune_iter": 10,
+ "tune_inner_folds": 3,
+ "cv_folds": 5,
+ "cv_repeats": 2,
+ "spatial_block_km": 5.0,
+ "spatial_repeats": 2,
+ "nested_cv": false
+}
