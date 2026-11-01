@@ -70,7 +70,7 @@ accompanying paper are in [`case_study/`](case_study).
 Ray, S., Rahman, M. M., & Nuhash, M. M. R. LSM Mapper: an open-source desktop
 application for landslide susceptibility mapping with machine learning and bivariate
 statistical methods. *Mersin Photogrammetry Journal* (under review).
-Software archive: https://doi.org/10.5281/zenodo.21427097
+Software archive (v2.1.1): https://doi.org/10.5281/zenodo.23853999 (v1.0.1: https://doi.org/10.5281/zenodo.21427097)
 
 ## License
 
