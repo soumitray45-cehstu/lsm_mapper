@@ -4,9 +4,9 @@ from PyInstaller.utils.hooks import collect_all, collect_submodules
 datas, binaries, hidden = [], [], []
 for pkg in ("rasterio", "pyogrio", "pyproj", "shapely", "geopandas", "xgboost",
             "jenkspy", "folium", "branca", "numba", "llvmlite"):
-    d, b, h = collect_all(pkg)
+    d, b, h = collect_all(pkg, filter_submodules=lambda n: ".tests" not in n and ".testing" not in n)
     datas += d; binaries += b; hidden += h
-hidden += collect_submodules("sklearn") + collect_submodules("lsm_mapper")
+hidden += collect_submodules("sklearn", filter=lambda n: ".tests" not in n) + collect_submodules("lsm_mapper")
 hidden += ["scipy.special._cdflib", "PIL.Image"]
 
 a = Analysis(["../main.py"], pathex=[".."], binaries=binaries, datas=datas,

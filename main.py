@@ -18,7 +18,19 @@ if getattr(sys, "frozen", False):          # PyInstaller bundle: point GDAL/PROJ
     os.environ.setdefault("NUMBA_CACHE_DIR", os.path.join(tempfile.gettempdir(), "lsm_mapper_numba"))
 
 
+def _frozen_parallel():
+    """In the frozen executable, run joblib/scikit-learn parallel work in
+    threads: loky worker processes would re-launch the executable itself."""
+    if getattr(sys, "frozen", False):
+        try:
+            import joblib
+            joblib.parallel_config(backend="threading")
+        except Exception:
+            os.environ["JOBLIB_MULTIPROCESSING"] = "0"
+
+
 def _main():
+    _frozen_parallel()
     if len(sys.argv) > 1 and sys.argv[1] in ("--run", "--version", "--selftest"):
         if sys.argv[1] == "--version":
             from lsm_mapper import __version__
@@ -36,4 +48,6 @@ def _main():
 
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     sys.exit(_main())
